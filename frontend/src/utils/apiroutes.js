@@ -18,6 +18,9 @@ export const UPDATE_PROFILE = `${USER_ENDPOINTS}/update-profile`;
 export const UPDATE_PASSWORD = `${USER_ENDPOINTS}/update-password`;
 export const LOGOUT = `${USER_ENDPOINTS}/log-out`
 
+export const DELETE_USER = `coming soon`
+export const VERIFY_OTP = 'soon'
+
 // Product endpoints
 export const PENDING_PRODUCTS = `${PRODUCT_ENDPOINTS}/pending-products`
 export const GET_PRODUCTS = `${PRODUCT_ENDPOINTS}/get-products`
