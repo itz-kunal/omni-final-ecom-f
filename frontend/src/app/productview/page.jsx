@@ -5,9 +5,11 @@ import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { IoCartOutline } from "react-icons/io5";
+import { useRouter } from "next/navigation";
 
 function Page() {
-    const {searchedKay, category} = req.query ;
+     const router = useRouter();
+    const {searchedKay, category} = router.query ;
     const [data, setData] = useState([]);
 
     useEffect(()=>{
