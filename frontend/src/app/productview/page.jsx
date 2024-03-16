@@ -1,4 +1,4 @@
-'use-client'
+'use client'
 import { SEARCH_BY_CATEGORY, SEARCH_PRODUCTS } from '@/utils/apiroutes';
 import { ArrowLeftIcon } from '@radix-ui/react-icons'
 import axios from 'axios';
