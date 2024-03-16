@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import axios from 'axios'
-import { DELETE_USER } from '@/utils/apiroutes'
+// import { DELETE_USER } from '@/utils/apiroutes'
 import { useToast } from "@/components/ui/use-toast"
 
 
@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/use-toast"
 const DeleteDialog = ({userId, toast}) => {
     const deleteUser = async (userId) => {
         try {
-            const res =await axios.post(DELETE_USER, {
+            const res =await axios.post('DELETE_USER', {
                 body: { deleteingUser: userId }
             })
            
