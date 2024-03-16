@@ -5,7 +5,7 @@ import { useToast } from '../ui/use-toast';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 
-import { VERIFY_OTP } from '@/utils/apiroutes';
+// import { VERIFY_OTP } from '@/utils/apiroutes';
 const Otp = ({ phone }) => {
     const {
         toast
@@ -39,7 +39,7 @@ const Otp = ({ phone }) => {
             console.log('OTP :', otpValue);
             // setOtp(['', '', '', '', '', '']);
 
-            axios.post(VERIFY_OTP, {
+            axios.post('VERIFY_OTP', {
                 otpValue,
                 phone,
             }, {
