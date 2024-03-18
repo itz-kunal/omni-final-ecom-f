@@ -86,3 +86,9 @@ export const FASHION_PRODUCTS = `${ADMIN_ENDPOINTS}/fashion-products`
 export const GET_ALL_USERS = `${ADMIN_ENDPOINTS}/all-users`
 export const SEARCH_USERS = `${ADMIN_ENDPOINTS}/search-users`
 export const DELETE_USER = `${ADMIN_ENDPOINTS}/delete-user`;
+
+export const GET_ALL_SALES = 'soon';
+export const EDIT_NOTIFICATION = 'soon';
+export const DELETE_NOTIFICATION = 'soon';
+export const ADD_NOTIFICATION = 'soon';
+export const VERIFY_OTP = 'soon';
