@@ -32,7 +32,7 @@ function Coupons() {
     const { toast } = useToast();
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [coupons, setCoupons] = useState(data);
+    const [coupons, setCoupons] = useState([]);
 
     const [couponsToDisplay, setCouponsToDisplay] = useState([]);
     const [pages, setPages] = useState(1);
@@ -120,7 +120,7 @@ function Coupons() {
             <div className="flex items-center  mt-2">
                 {/* -------------------- display number -------------- */}
                 <div className="text-medium text-slate-500 mr-10">
-                    {`${couponsToDisplay.length} out of ${Coupons.length} displayed`}
+                    {`${couponsToDisplay.length} out of ${coupons.length} displayed`}
                 </div>
                 {/* ---------------------- select col numbers ----------------- */}
                 <Select onValueChange={(value) => setPageSize(value)}>
