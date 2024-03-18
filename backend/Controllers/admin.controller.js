@@ -1,85 +1,157 @@
 const sendMail = require('../Functions/sendMail');
-
+const Banner = require('../Models/banner.model.js')
 const walletController = require("./wallet.controller");
 const orderController = require("./order.controller");
 
 const Transaction = require("../Models/transactions.model");
 const User = require("../Models/user.model");
-const { PendingOrder, Order } = require("../Models/order.model");
-const {FashionProduct,GeneralProduct} = require('../Models/product.model.js');
+const {
+    PendingOrder,
+    Order
+} = require("../Models/order.model");
+const {
+    FashionProduct,
+    GeneralProduct
+} = require('../Models/product.model.js');
 const Category = require('../Models/categories.model.js');
 
 
 const getAllUsers = async (req, res) => {
     try {
-        if (!req.session.isAdmin) {
-            return res.status(401).send('you are not allowed to perform this action')
-        }
-
         const allUsers = await User.find({});
-        return res.send(allUsers)
+        return res.send({
+            msg: 'fetched successfully',
+            users: allUsers
+        })
     } catch (err) {
         console.error('error at getting all users in admin controller', err);
-        return res.status(500).send('something went wrong ! please try again.')
+        return res.status(500).send({
+            msg: 'something went wrong ! please try again.'
+        })
     }
 
 }
-const getPendingOrders = async (req,res) =>{
-    try{
+
+const searchUser = async (req, res) => {
+    try {
+        const {
+            userId,
+            userName
+        } = req.body;
+
+        let data;
+        if (userId) {
+            data = await User.find({
+                _id: userId
+            })
+        } else if (userName) {
+            data = await User.find({
+                name: userName
+            })
+        } else {
+            return res.status(401).send({
+                msg: 'argument missing !'
+            })
+        }
+
+        return res.send({
+            msg: 'successfull',
+            users: data
+        })
+    } catch (err) {
+        console.error('admin error in searching user', err)
+        return res.status(500).send({
+            msg: 'Something went wrong !'
+        })
+    }
+}
+const deleteUser = async (req, res) => {
+    try {
+        const {
+            userId
+        } = req.body;
+    
+        User.findByIdAndDelete(userId , (err) => {
+            if (err) {
+                console.error('admin error in deleting user', err.message);
+                return res.status(500).send({msg:'something went wrong'});
+
+            } else {
+                return res.send({msg:'user deleted successfully'});
+            }
+        })
+
+    } catch (err) {
+        console.error('admin error in deleting user', err.message);
+        return res.status(500).send({msg:'something went wrong'});
+    }
+}
+
+//admin actions on order
+const getPendingOrders = async (req, res) => {
+    try {
         const orders = await PendingOrder.find({});
         return res.send(orders)
-    }catch (err) {
+    } catch (err) {
         console.error('error at getting pending orders in admin controller', err);
         return res.status(500).send('something went wrong ! please try again.')
     }
 }
-const getAllOrders = async (req,res)=>{
-    try{
+const getAllOrders = async (req, res) => {
+    try {
         const orders = await Order.find({});
         return res.send(orders);
-    }catch (err) {
+    } catch (err) {
         console.error('error at getting all orders in admin controller', err);
         return res.status(500).send('something went wrong ! please try again.')
     }
 }
-const getFashionProducts = async(req,res)=>{
-    try{
+
+//actions on products pending products action is in product controller
+const getFashionProducts = async (req, res) => {
+    try {
 
         const products = await FashionProduct.find({});
         return res.send(products);
-    }catch (err) {
+    } catch (err) {
         console.error('error at getting fashion products in admin controller', err);
         return res.status(500).send('something went wrong ! please try again.')
     }
 }
-const getGeneralProducts = async(req,res)=>{
-    try{
-     
+const getGeneralProducts = async (req, res) => {
+    try {
+
         const products = await GeneralProduct.find({});
         return res.send(products);
-    }catch (err) {
+    } catch (err) {
         console.error('error at getting general products in admin controller', err);
         return res.status(500).send('something went wrong ! please try again.')
     }
 }
 
+//transaction actions 
 const getAllTransactions = async (req, res) => {
     try {
-        // if (!req.session.isAdmin) {
-        //     return res.status(401).send('you are not allowed to perform this action')
-        // }
+        const {
+            status
+        } = req.query;
+       
+        let allTransactions = [];
+        if (status == 'all') {
+            allTransactions = await Transaction.find({});
+        } else {
+            allTransactions = await Transaction.find({
+                status
+            });
+        }
 
-        const allTransactions = await Transaction.find({
-            status: 'pending'
-        });
         return res.send(allTransactions);
     } catch (err) {
         console.error('error in getting all transactions at admin controller', err);
         return res.status(500).send('something went wrong ! please try again')
     }
 }
-
-const approveTransaction = async (req, res) => { 
+const approveTransaction = async (req, res) => {
     const {
         transactionId,
         status
@@ -93,7 +165,7 @@ const approveTransaction = async (req, res) => {
         if (!transaction) {
             return res.status(401).send('transaction not fount, try again');
         }
-        if(transaction.status == 'approved'){
+        if (transaction.status == 'approved') {
             return res.status(402).send('trasaction has already approved')
         }
 
@@ -129,23 +201,77 @@ const approveTransaction = async (req, res) => {
     }
 }
 
-const addCategory = async(req,res)=>{
-    try{
-        const {name,type,description,platformCharge} = req.body;
-        const ifCategory = await Category.findOne({name});
-        if(ifCategory){
+//category action
+const addCategory = async (req, res) => {
+    try {
+        const {
+            name,
+            type,
+            description,
+            platformCharge
+        } = req.body;
+        const ifCategory = await Category.findOne({
+            name
+        });
+        if (ifCategory) {
             return res.status(400).send('category already exists')
         }
 
         const category = new Category({
-            name,type,platformCharge,description
+            name,
+            type,
+            platformCharge,
+            description
         })
         await category.save();
 
         return res.send('category added successfully')
-    }catch(err){
+    } catch (err) {
         console.log('admin err', err)
         res.status(500).send('something went wrong try again !')
+    }
+}
+
+//actions on banner
+const allBanner = async (req, res) => {
+    try {
+        const banners = await Banner.find({});
+
+        return res.send({
+            msg: 'fetched successfully',
+            banners
+        });
+
+    } catch (err) {
+        console.error('all banner err in admin.controller', err);
+        return res.status(500).send({
+            msg: 'internal server error ! please try later'
+        })
+    }
+}
+const addBanner = async (req, res) => {
+    try {
+        const {
+            name,
+            description
+        } = req.body;
+        const banner = new Banner({
+            name,
+            description,
+            image: req.files
+        })
+
+        await banner.save();
+
+        return res.send({
+            msg: 'Banner added successfully',
+            banner
+        });
+    } catch (err) {
+        console.error('add banner err in admin.controller', err);
+        return res.status(500).send({
+            msg: 'internal server error ! please try later'
+        })
     }
 }
 
@@ -157,7 +283,11 @@ const adminController = {
     getGeneralProducts,
     getPendingOrders,
     approveTransaction,
-    addCategory
+    addCategory,
+    allBanner,
+    addBanner,
+    searchUser,
+    deleteUser
 }
 
 module.exports = adminController;

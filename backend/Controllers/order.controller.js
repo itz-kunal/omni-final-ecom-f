@@ -6,23 +6,7 @@ const User = require('../Models/user.model');
 const sendMail = require("../Functions/sendMail");
 const saveDocs = require('../Middlewares/saveDocs');
 
-// const getOrders = async (req, res) => {
-//     try {
-//         const {
-//             shopId
-//         } = req.shop;
-
-//         const shop = await Shop.findById(shopId);
-//         if (!shop) {
-//             return res.status(402).send('invalid seller');
-//         }
-
-//         return res.send(shop.orders)
-//     } catch (err) {
-//         console.error('error in getting orders at shop controller', err);
-//         return res.status(500).send('something went wrong try again')
-//     }
-// }
+//send a detailed info of order even if user or admin or seller
 const getOrder = async(req,res)=>{
     try{
         const {userId} = req.user;
@@ -33,6 +17,7 @@ const getOrder = async(req,res)=>{
         if(!order.user.equals(userId)&&!order.user.equals(shopId)){
             return res.send('sorry but it seems this is not your order')
         }
+        
         return res.send(order)
     }catch(err){
         console.error('error in get order at order controller', err);

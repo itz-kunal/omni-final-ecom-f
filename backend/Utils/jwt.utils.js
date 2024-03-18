@@ -15,15 +15,28 @@ const generateToken = (user) => {
         if (!secret) throw new Error("JWT secret not found");
 
         // data to assign
-        const data = {
-            userId: user._id,
-            name:user.name,
-            email: user.email,
-            role: user.role,
+        let data;
+        if (user.role == 'seller') {
+            data = {
+                userId: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                shopId: user.shop
+            }
+        } else {
+            data = {
+                userId: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            }
         }
 
         // generate token
-        const token = jwt.sign(data, secret, { expiresIn });
+        const token = jwt.sign(data, secret, {
+            expiresIn
+        });
 
         return token;
     } catch (error) {
@@ -41,30 +54,28 @@ const generateToken = (user) => {
  */
 function verifyToken(req, res, next) {
     const token = req.cookies.jwt || req.headers['authorization'];
-
-    console.log(token)
     if (!token) {
-        return res.status(403).send('invalid user');
+        return res.status(403).send({msg:'invalid user', status:'missing token'});
     }
-
     jwt.verify(token, secret, async (err, decoded) => {
         if (err) {
-            return res.status(401).send('Invalid token ! please login again');
+            return res.status(401).send({msg:'Invalid token ! please login again', status:'missing token'});
         }
-       
-        if(decoded.role == 'seller'){
-          
-            const res = await Shop.findOne({owner:decoded.userId})
 
+        if (decoded.role == 'seller') {
             req.shop = {
-                shopId: res._id.toString()
+                shopId: decoded.shopId
             }
-           
         }
-        
+
         req.user = decoded;
         next();
     });
 }
 
-module.exports = { generateToken,verifyToken }
+
+
+module.exports = {
+    generateToken,
+    verifyToken
+}

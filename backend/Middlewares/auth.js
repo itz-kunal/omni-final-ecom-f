@@ -8,4 +8,11 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-module.exports = isAuthenticated;
+function checkAdmin(req,res,next){
+    if(req.user.role != 'admin'){
+        return res.status(402).send({msg:'admin permission required for this action'})
+    }
+    return next()
+}
+
+module.exports = {checkAdmin};

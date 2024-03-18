@@ -165,7 +165,7 @@ const getShop = async (req, res) => {
         const uniqueName = req.params.id
         const {
             size
-        } = req.body;
+        } = req.query;
 
         const shop =  await  Shop.findOne({
             uniqueName
@@ -222,34 +222,32 @@ const getShop = async (req, res) => {
         delete shop.status
         delete shop.createdAt
 
-        const finalData = {
-            ...shop,
+        return res.send({
+            msg:'successfull',
+            shop,
             products: [...generalProducts, ...fashionProducts]
-        }
-
-        return res.send(finalData)
+        })
 
     } catch (err) {
         console.error('something went wrong in searching shop at shop controller', err);
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({msg:'something went wrong try again'})
     }
 }
 const searchShop = async (req, res) => {
     try {
         const {
-            uniqueName,
-            name
+            searchedKey
         } = req.body;
 
         const shops = await Shop.find({
             $or: [{
                     uniqueName: {
-                        $regex: new RegExp(uniqueName, 'i')
+                        $regex: new RegExp(searchedKey, 'i')
                     }
                 },
                 {
                     name: {
-                        $regex: new RegExp(name, 'i')
+                        $regex: new RegExp(searchedKey, 'i')
                     }
                 }
             ],
@@ -260,10 +258,10 @@ const searchShop = async (req, res) => {
             shopImage: 1
         }).limit()
 
-        return res.send(shops)
+        return res.send({msg:'fetched successfully', shops})
     } catch (err) {
         console.error('error in searching shop at shop controller', err);
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({msg:'something went wrong try again'})
     }
 }
 

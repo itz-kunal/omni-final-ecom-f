@@ -1,3 +1,4 @@
+const Coupon = require('../Models/coupon.model');
 const Transaction = require('../Models/transactions.model');
 const User = require('../Models/user.model');
 
@@ -10,25 +11,19 @@ const buyCoupon = async (req, res) => {
         userId
     } = req.user;
     const {
-        amount
+        amount,type
     } = req.body;
 
     try {
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).send(`user doesn't exist ! please login again.`)
+            return res.status(404).send({msg:`user doesn't exist ! please login again.`})
         }
 
         if(user.omniCoin < amount){
-            return res.send('insufficient balance please toup !')
+            return res.send({msg:'insufficient balance please toup !'})
         }
-        // const transaction = new Transaction({
-        //     upi,
-        //     amount,
-        //     paidFor: 'coupon',
-        //     user: userId
-        // })
-
+       
         let win;
         if (amount == 20) {
             win = getRandomNumber(0, 5)
@@ -51,39 +46,58 @@ const buyCoupon = async (req, res) => {
             refwin = getRandomNumber(70, 150)
         }
 
+        const referral = await User.findOne({
+            referralCode: user.referredBy
+        })
+        if (referral) {
+            referral.earning += refwin
+            referral.coupons.push({
+                amount,
+                win: refwin,
+                type: 'time',
+            })
+            await referral.save();
+        }
+
+        if(type == '60day'){
+            const coupon = new Coupon({
+                amount,
+                type,
+                user:user._id,
+                count:1
+            })
+
+            user.coupons.push({
+                amount,
+                type,
+                win
+            })
+
+            await Promise.all([coupon.save(), user.save()])
+
+            return res.send({msg:`you bought it successfully this time win is ₹${win}`})
+        }
 
         user.omniCoin -= amount
         user.coupons.push({
-            type: 'scratch',
+            type: 'time',
             amount,
             win,
         })
 
         user.earning+=win
       
-        const referral = await User.findOne({
-            referralCode: user.referredBy
-        })
-
-        if (referral) {
-            referral.earning += refwin
-            referral.coupons.push({
-                amount,
-                win: refwin,
-                type: 'scratch',
-            })
-            await referral.save();
-        }
-
+    
         await user.save();
-        return res.send(`You won ₹${win}`);
+        return res.send({msg:`You won ₹${win}`});
 
     } catch (err) {
         console.error('error in buying coupon at coupon controller', err);
-        return res.send('something went wrong ! try again.')
+        return res.send({msg:'something went wrong ! try again.'})
     }
 };
 
+//send coupons to user
 const getCoupons = async(req,res)=>{
     try{
         const {userId} = req.user;
@@ -97,92 +111,30 @@ const getCoupons = async(req,res)=>{
     }
 }
 
-// const updCouponStatus = async (userId, couponId, customWin, status) => {
-//     try {
-//         const user = await User.findById(userId);
-//         const couponIndex = user.coupons.findIndex(elem => elem._id.equals(couponId));
-//         const coupon = user.coupons[couponIndex];
+//admin action
+const send60Coupon = async(req,res)=>{
+    try{
+        const {schCouponId} = req.body;
+        const coupon = await Coupon.findById(schCouponId).populate('user');
+        if(coupon.type !== '60day' || coupon.count > 60){
+            return res.status(400).send({msg:'invalid attempt either 60 days passes or invalid coupon'})
+        }
 
-//         if (status != 'approve') {
-//             user.coupons.splice(couponIndex, 1);
-//             await user.save();
-//             return true;
-//         }
-//         if (coupon.status == 'approved'){
-//             throw new Error('coupon has already approved')
-//         }
+        let win = getRandomNumber(50,150);
 
-//         if (coupon.type == 'scratch') {
-//             const amount = coupon.amount;
-
-//             coupon.status = 'approved';
-//             user.balance2 += amount;
-//             if(customWin){
-//                 coupon.win = customWin;
-//             }
-
-//             await user.save();
-
-//             let refwin;
-//             if (amount == 20) {
-//                 refwin = getRandomNumber(0, 5)
-//             } else if (amount == 100) {
-//                 refwin = getRandomNumber(10, 20)
-//             } else if (amount == 500) {
-//                 refwin = getRandomNumber(30, 100)
-//             } else if (amount == 1000) {
-//                 refwin = getRandomNumber(70, 150)
-//             }
-
-//             const referral = await User.findOne({
-//                 referralCode: user.referredBy
-//             })
-
-//             if (referral) {
-//                 referral.coupons.push({
-//                     amount,
-//                     win: refwin,
-//                     type: 'scratch',
-//                     status: 'approved'
-//                 })
-//                 await referral.save();
-//             }
-//         }
-
-//         return true;
-//     } catch (err) {
-//         throw err
-//     }
-// }
-
-const openScratch = async (req, res) => {
-    const cardId = req.body.cardId;
-    try {
-        const cardUser = await User.findOne({
-            'coupons._id': cardId
+        coupon.user.coupons.push({
+            amount:coupon.amount,
+            win,            
         })
+        coupon.count += 1;
+        await Promise.all([coupon.user.save(), coupon.save()]);
+        return res.send({msg:'coupon sent to user successfully !'})
 
-        if (!cardUser) {
-            return res.status(401).send('invalid user for opening coupon')
-        }
-
-        const card = cardUser.coupons.find(elem => elem._id == cardId)
-
-        if(card.status == 'opened'){
-            return res.status(402).send('coupon has already opened')
-        }
-
-        card.status = 'opened';
-        cardUser.balance2 += card.win*0.2 ;
-        cardUser.balance += card.win*0.8 ;
-        
-        await cardUser.save();
-        return res.send(card)
-    } catch (err) {
-        console.error('error in opening scratch at coupon controller', err)
-        return res.status(500).send('Internal server error ! try again')
+    }catch (err) {
+        console.error('error in sending60Coup coupon at coupon controller', err);
+        return res.send({msg:'something went wrong ! try again.'})
     }
-};
+}
 
 //send coupon
 const sendCoupon = async (req, res) => {
@@ -235,9 +187,8 @@ const sendCoupon = async (req, res) => {
 
 const couponController = {
     buyCoupon,
-    openScratch,
-    // updCouponStatus
-    getCoupons
+    getCoupons,
+    send60Coupon
 }
 
 module.exports = couponController;

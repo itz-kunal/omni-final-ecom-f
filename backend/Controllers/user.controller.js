@@ -73,8 +73,13 @@ const login = async (req, res) => {
     try {
 
         if (phone == admin_phone && password == admin_pass) {
-            req.session.isAuthenticated = true;
-            req.session.isAdmin = true;
+            const token = generateToken({
+                role:'admin'
+            })
+            res.cookie('jwt', token,{
+                httpOnly: true,
+                sameSite: "strict",
+            })
             return res.send('admin login successfull !')
         }
 
@@ -98,10 +103,14 @@ const login = async (req, res) => {
         return res.send({msg:'Login successfull', user:{name:user.name, role:user.role}, status:true})
 
     } catch (err) {
+
         console.error('error at login', err);
         return res.status(500).send('something went wrong ! try again.')
+        
     }
 };
+
+
 const getUser = async (req, res) => {
     try {
         const {

@@ -12,6 +12,8 @@ const {
     default: mongoose
 } = require("mongoose");
 
+
+//send random products to user based on size
 const getProducts = async (req, res) => {
     try {
         const {
@@ -71,6 +73,8 @@ const getPendingProducts = async (req, res) => {
         return res.status(500).send('something went wrong try again')
     }
 }
+
+//search product based on key and size
 const searchProducts = async (req, res) => {
     try {
         const {
@@ -103,7 +107,7 @@ const searchProducts = async (req, res) => {
                         category: 1,
                         price: 1,
                         image: {
-                            $arrayElemAt: ["$image", 0]
+                            $arrayElemAt: ["$images", 0]
                         }
                     }
                 }
@@ -127,7 +131,7 @@ const searchProducts = async (req, res) => {
                         category: 1,
                         price: 1,
                         image: {
-                            $arrayElemAt: ["$image", 0]
+                            $arrayElemAt: ["$images", 0]
                         }
                     }
                 }
@@ -280,7 +284,6 @@ const getProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
     try {
-        console.log('hi')
         const {
             userId
         } = req.user;
@@ -473,7 +476,7 @@ const approveProduct = async (req, res) => {
     }
 }
 
-
+//admin action
 const getCategories = async (req, res) => {
     try {
         const {

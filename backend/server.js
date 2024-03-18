@@ -19,7 +19,7 @@ const app = express();
 const port = process.env.PORT || 80;
 
 // db connection
-const mongo_uri = process.env.MONGO_URI || 'mongodb+srv://trekomi:AkqEPipnajKeTrTC@cluster0.uy9ofus.mongodb.net/omitrek-new-trial';
+const mongo_uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/omitrek';
 mongoose.connect(mongo_uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -43,6 +43,9 @@ app.use(session({
     saveUninitialized: true
 }));
 app.use(cors({
+    // orign:'http://localhost:3000',
+    origin: 'https://omni-final-ecom-latest.vercel.app/', 
+    // orign:'*',
     credentials: true // Allow cookies to be sent from the frontend
 }))
 
