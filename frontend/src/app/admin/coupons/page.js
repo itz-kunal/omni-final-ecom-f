@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button"
 import axios from 'axios';
-import { ALL_WITHDRAWL, UPDATE_WITHDRAW, Coupons, SENT_60_COUPON, ALL_COUPONS } from '@/utils/apiroutes';
+import { ALL_WITHDRAWL, UPDATE_WITHDRAW, SENT_60_COUPON, ALL_COUPONS } from '@/utils/apiroutes';
 import { useToast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from '@/components/ui/input';
