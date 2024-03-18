@@ -19,7 +19,7 @@ const app = express();
 const port = process.env.PORT || 80;
 
 // db connection
-const mongo_uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/omitrek';
+const mongo_uri = process.env.MONGO_URI || 'mongodb+srv://trekomi:AkqEPipnajKeTrTC@cluster0.uy9ofus.mongodb.net/omitrek-new-trial';
 mongoose.connect(mongo_uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
