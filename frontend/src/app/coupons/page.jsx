@@ -30,7 +30,7 @@ function Page() {
 
             <div className="flex flex-col pt-14 p-2 bg-slate-100 min-h-[100vh]">
 
-                <CouponCard initialTime={20} pAmount={300}  />
+                <CouponCard initialTime={300} pAmount={20}  />
                 <CouponCard bgColor={'bg-blue-200'} pAmount={100} initialTime={400} />
                 <CouponCard bgColor={'bg-green-200'} pAmount={500}  initialTime={600} />
                 <CouponCard bgColor={'bg-sky-200'} pAmount={1000}  initialTime={1000} />
