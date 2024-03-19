@@ -250,7 +250,7 @@ function SetTransactionPassword() {
     const handleSubmit = async () => {
 
         try {
-            const res = await axios.post(SET_TRANSACTION_PASSWORD, { password }, { withCredentials: true })
+            const res = await axios.post(SET_TRANSACTION_PASSWORD, { transactionPassword:password }, { withCredentials: true })
             toast({
                 title: res.data
             })
