@@ -41,7 +41,7 @@ function Transactions() {
     useEffect(() => {
         const getTransactions = async () => {
             try {
-                const res = await axios.get(GET_TRANSACTIONS);
+                const res = await axios.get(`${GET_TRANSACTIONS}?status=pending`);
                 setTransactions(res.data);
                 console.log(res.data)
             } catch (err) {
