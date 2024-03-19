@@ -190,7 +190,7 @@ function AskTransactionPassword({ phone, amount }) {
 
     const handleSubmit = async () => {
         try {
-            axios.post(SEND_MONEY, { phone, amount, password }, { withCredentials: true }).then(res=>{
+            axios.post(SEND_MONEY, { receiverPhone:phone, amount, password }, { withCredentials: true }).then(res=>{
             toast({
                 title: res.data
             })
