@@ -50,7 +50,8 @@ const register = async (req, res) => {
         const token = generateToken(registerApplication);
         res.cookie('jwt', token, {
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: 'none',
+            secure: true
         })
 
         const userRefBy = registerApplication.referredBy;
@@ -77,8 +78,9 @@ const login = async (req, res) => {
                 role:'admin'
             })
             res.cookie('jwt', token,{
-                httpOnly: true,
-                sameSite: "strict",
+                 httpOnly: true,
+            sameSite: 'none',
+            secure: true
             })
             return res.send('admin login successfull !')
         }
@@ -97,8 +99,9 @@ const login = async (req, res) => {
 
         const token = generateToken(user);
         res.cookie('jwt', token, {
-            httpOnly: true,
-            sameSite: "strict",
+             httpOnly: true,
+            sameSite: 'none',
+            secure: true
         })
         return res.send({msg:'Login successfull', user:{name:user.name, role:user.role}, status:true})
 
