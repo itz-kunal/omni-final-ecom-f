@@ -1,5 +1,5 @@
 
-const API_URI = process.env.API_URI || 'http://localhost:80' ; 
+const API_URI = process.env.API_URI || 'https://omni-final-ecom-backend.onrender.com' ; 
 
 const USER_ENDPOINTS = `${API_URI}/user`;
 const COUPON_ENDPOINTS = `${API_URI}/coupon`;
