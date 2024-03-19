@@ -32,7 +32,7 @@ function Transactions() {
     const { toast } = useToast();
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [transactions, setTransactions] = useState(data);
+    const [transactions, setTransactions] = useState([]);
 
     const [transactionsToDisplay, setTransactionsToDisplay] = useState([]);
     const [pages, setPages] = useState(1);
@@ -43,6 +43,7 @@ function Transactions() {
             try {
                 const res = await axios.get(GET_TRANSACTIONS);
                 setTransactions(res.data);
+                console.log(res.data)
             } catch (err) {
                 console.log('error in getting users', err)
                 toast({
