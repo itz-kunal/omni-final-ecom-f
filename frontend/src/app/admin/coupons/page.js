@@ -32,7 +32,7 @@ function Coupons() {
     const { toast } = useToast();
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [coupons, setCoupons] = useState(data);
+    const [coupons, setCoupons] = useState();
 
     const [couponsToDisplay, setCouponsToDisplay] = useState([]);
     const [pages, setPages] = useState(1);
