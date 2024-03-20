@@ -6,13 +6,11 @@ import React, {
 import Link from "next/link";
 import axios from 'axios';
 import {
-    REGISTER_SHOP,
-    SIGN_UP
+    REGISTER_SHOP
 } from '@/utils/apiroutes';
 import {
     useToast
 } from '../ui/use-toast';
-import { ifLoggedIn } from '../../utils/generalFunctions';
 import { useRouter } from 'next/navigation';
 // import { useRouter } from 'next/router';
 
@@ -37,9 +35,7 @@ const RegisterShop = () => {
     const [isFormValid, setIsFormValid] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(true);
 
-    // useEffect(() => {
-    //     ifLoggedIn(router)
-    // }, [router])
+
     const validateForm = () => {
         let errors = {};
 
@@ -53,9 +49,9 @@ const RegisterShop = () => {
             errors.phone = 'Phone number is invalid.';
         }
 
-        if (GST.length < 18) {
-            errors.gst = 'Password is required.';
-        } 
+        // if (GST.length < 18) {
+        //     errors.gst = 'Password is required.';
+        // } 
         setErrors(errors);
         setIsFormValid(Object.keys(errors).length === 0);
         setIsSubmitting(!(Object.keys(errors).length === 0));
@@ -79,19 +75,16 @@ const RegisterShop = () => {
                 withCredentials: true
             })
                 .then(res => {
-
-                    if (res.data.status == true) {
-                        console.log()
                         toast({
                             title: res.data.msg,
                         })
                         localStorage.setItem('user', JSON.stringify(res.data.user))
                         window.location.href = `/`;
-                    }
+
                 }).catch(err => {
                     console.log('error in RegisterShop', err);
                     toast({
-                        title: err.response.data,
+                        title: err.response.data || err.message,
                     })
                 })
 
@@ -115,7 +108,7 @@ const RegisterShop = () => {
                             value={uniqueName}
                             onChange={(e) => setUniqueName(e.target.value)}
                         />
-                        {/* {errors.name && <p className='text-red-700 text-sm'>{errors.name}</p>} */}
+                        {errors.uniqueName && <p className='text-red-700 text-sm'>{errors.uniqueName}</p>}
                     </div>
 
                     <div className="mb-4">
@@ -198,8 +191,7 @@ const RegisterShop = () => {
                             style={{ opacity: !isSubmitting ? 1 : 0.5 }}
                             disabled={isSubmitting}
                         >
-
-                            Register
+                            Create
                         </button>
                     </div>
                 </form>

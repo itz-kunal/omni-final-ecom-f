@@ -18,7 +18,7 @@ import ProductContainer from "@/components/shop/productContainer/ProductContaine
 import ProductCard from '@/components/shop/productContainer/ProductCard'
 import CategoryTitle from "@/components/shop/homeCategory/CategoryTitle"
 import CardComp from "@/components/shop/container/CardComp"
-import { IoCaretBackCircleOutline, IoCartOutline } from "react-icons/io5"
+import { IoCartOutline } from "react-icons/io5"
 import Autoplay from "embla-carousel-autoplay"
 import { useContext, useEffect, useState } from "react"
 import { toast } from "@/components/ui/use-toast"
@@ -27,7 +27,7 @@ import { GET_PRODUCT_DETAILS, GET_USER } from "@/utils/apiroutes"
 import UserContext from "@/app/context/UseContext"
 
 
-function Page({ params }) {
+function Page({ params, searchParams }) {
     const router = useRouter();
     const [api, setApi] = useState(0);
     const [current, setCurrent] = useState(0);
@@ -35,9 +35,16 @@ function Page({ params }) {
 
     const { user, setUser } = useContext(UserContext);
 
-    const [product, setProduct] = useState('');
+    const [product, setProduct] = useState({
+        name:'name of product is lodumal',
+        deletePrice: 500,
+        price: 300,
+        discount: 100,
+        images: [{ src: '/omilogo.png' }, { src: '/omilogo.png' }]
+    });
     const [loading, setLoading] = useState(true);
 
+    //for automatic scrolling caresol
     useEffect(() => {
         if (!api) {
             return
@@ -53,38 +60,26 @@ function Page({ params }) {
     }, [count, current, api])
 
     useEffect(() => {
-        const {productType, shopId} = req.querry ;
-        
-        async function fetchData() {
-            try {
+        const { productType, shopId } = searchParams;
+        console.log(params, searchParams)
 
-                axios.post(`${GET_PRODUCT_DETAILS}/${params.id}`, { productType, shopId }, { withCredentials: true })
-                    .then(res => {
-                        setProduct(res.data);
-                        setLoading(false)
-                    });
+        axios.post(`${GET_PRODUCT_DETAILS}/${params.id}`, { productType, shopId }, { withCredentials: true })
+            .then(res => {
+                setProduct(res.data);
+                setLoading(false)
+            }).catch(err => {
+                console.log(err)
+            });
 
-                if (!user) {
-                    axios.get(GET_USER, { withCredentials:true }).then(res => setUser(res.data))
-                }
+    }, [params, searchParams])
 
-            } catch (err) {
-                console.error('error in product detail', err);
-                toast({
-                    title: err.message
-                })
-            }
-        }
-        fetchData()
-    }, [params.id, user, setUser])
-
-    if (loading) {
-        return (
-            <>
-                Loading...
-            </>
-        )
-    }
+    // if (loading) {
+    //     return (
+    //         <>
+    //             Loading...
+    //         </>
+    //     )
+    // }
 
 
     return (
@@ -93,7 +88,7 @@ function Page({ params }) {
             <div className='flex p-3 shadow-md shadow-gray-100 justify-between fixed w-full bg-sky-500 z-30'>
                 <div className='flex items-center'>
                     <div className='cursor-pointer' onClick={() => router.back()}><ArrowLeftIcon className='size-5' /></div>
-                    <div className='ml-4 font-semibold text-[1em]'>Coupons</div>
+                    <div className='ml-4 font-semibold text-[1em]'>Product Detail</div>
                 </div>
                 <div className='flex'>
                     <div>Search</div>
@@ -103,9 +98,9 @@ function Page({ params }) {
                 </div>
             </div>
 
-
             <div className=" bg-gray-200 shadow-md mb-4 pt-16">
 
+                {/* top advertisement branding section */}
                 <div className="p-2 flex bg-white border-b-[1px] border-gray-300">
                     <div className="mt-1 size-16 bg-slate-300 flex justify-center items-center">
                         <Image width={100} height={100} alt="img" className="h-full" />
@@ -122,26 +117,16 @@ function Page({ params }) {
 
                 <div className="flex bg-white flex-wrap">
                     <div className="md:flex flex-col p-2 pt-1 hidden">
-                        <div className="size-24 flex justify-center items-center bg-slate-100 mt-1">
-                            <Image width={100} height={100} alt="img" className="h-full" />
-                        </div>
-                        <div className="size-24 flex justify-center items-center bg-slate-100 mt-1">
-                            <Image width={100} height={100} alt="img" className="h-full" />
-                        </div>
-
-                        <div className="size-24 flex justify-center items-center bg-slate-100 mt-1">
-                            <Image width={100} height={100} alt="img" className="h-full" />
-                        </div>
-                        <div className="size-24 flex justify-center items-center bg-slate-100 mt-1">
-                            <Image width={100} height={100} alt="img" className="h-full" />
-                        </div>
-                        <div className="size-24 flex justify-center items-center bg-slate-100 mt-1">
-                            <Image width={100} height={100} alt="img" className="h-full" />
-                        </div>
+                        {
+                            product.images.map((img, i) => (
+                                <div key={i} className="size-24 flex justify-center items-center bg-slate-100 mt-1">
+                                    <Image src={img.src} width={100} height={100} alt="img" className="w-full" />
+                                </div>
+                            ))}
 
                     </div>
 
-                    <Carousel setApi={setApi} className='w-full bg-white max-w-[700px] mt-2'
+                    <Carousel setApi={setApi} className='w-full bg-white max-w-[650px] mt-2'
                         plugins={[
                             Autoplay({
                                 delay: 4000,
@@ -149,28 +134,23 @@ function Page({ params }) {
                         ]}>
                         <CarouselContent>
                             {
-                                product.images.map(img => {
-                                    <CarouselItem>
-                                        <div className="size-full h-[60vh] flex justify-center items-center">
+                                product.images.map((img, i) => (
+                                    <CarouselItem key={i}>
+                                        <div className="size-full h-[60vh] flex justify-center items-center bg-black">
+                                            hello
                                             <img src={img.src} alt="" className="w-full" />
                                         </div>
                                     </CarouselItem>
-                                })
+                                ))
                             }
-                            {/* <CarouselItem>
-                                <div className="size-full h-[60vh] flex justify-center items-center">
-                                    <img src="/omilogo.png" alt="" className="w-full" />
-                                </div>
-                            </CarouselItem>
-                            <CarouselItem>its lorem</CarouselItem>
-                            <CarouselItem>...</CarouselItem> */}
                         </CarouselContent>
                         <div className="flex w-full justify-center p-1">
-                            <p className={`size-[10px] border-[1px] border-slate-700 rounded-full m-1 ${current == 1 ? 'bg-gray-500' : ''}`}></p>
-                            <p className={`size-[10px] border-[1px] border-slate-700 rounded-full m-1 ${current == 2 ? 'bg-gray-500' : ''}`}></p>
-                            <p className={`size-[10px] border-[1px] border-slate-700 rounded-full m-1 ${current == 3 ? 'bg-gray-500' : ''}`}></p>
-                            <p className={`size-[10px] border-[1px] border-slate-700 rounded-full m-1 ${current == 4 ? 'bg-gray-500' : ''}`}></p>
-                            <p className={`size-[10px] border-[1px] border-slate-700 rounded-full m-1 ${current == 5 ? 'bg-gray-500' : ''}`}></p>
+                            {
+                                product.images.map((img, i) => (
+                                    <p key={i} className={`size-[10px] border-[1px] border-slate-700 rounded-full m-1 ${current == (i + 1) ? 'bg-gray-500' : ''}`}></p>
+                                ))
+                            }
+
                         </div>
                     </Carousel>
 
@@ -182,12 +162,12 @@ function Page({ params }) {
                         <p className="p-2 pt-4 text-3xl font-mono font-bold bg-white w-full">
                             <del className="mr-4 text-gray-500 opacity-80 font-thin font-serif">{product.deletePrice}</del>
                             ₹{product.price}
-                            <span className="text-green-500 text-2xl mb-2 font-medium"> -₹{discount}</span>
+                            <span className="text-green-500 text-2xl mb-2 font-medium"> -₹{product.discount}</span>
                         </p>
 
 
                         <div className="p-2 bg-white mt-1 pb-6">
-                            <h2 className=" text-lg font-bold mb-2">Offers & Coupons <Link href={'/left'} className="float-right mr-2 underline text-blue-600 font-medium font-mono px-3">info</Link></h2>
+                            <h2 className=" text-lg font-bold mb-2">Offers & Coupons <Link href={'/user/wallet'} className="float-right mr-2 underline text-blue-600 font-medium font-mono px-3">info</Link></h2>
 
                             <RadioGroup defaultValue="none" className='ml-3'>
                                 <div className="flex items-center space-x-2">

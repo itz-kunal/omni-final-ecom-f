@@ -1,30 +1,38 @@
 'use client'
 import React, { useState } from "react";
-import UserContext, { ProductContext } from "./UseContext";
+import UserContext, { ShopContext } from "./UseContext";
 
 const UserContextProvider = ({ children }) => {
     const [user, setUser] = useState('');
-    const [withdrawls, setWithdrawls] = useState([]);
-    const [sentCoins, setSentCoins] = useState([]);
-    const [receivedCoins, setReceivedCoins] = useState([]);
+    const [withdrawls, setWithdrawls] = useState('');
+    const [sentCoins, setSentCoins] = useState('');
+    const [receivedCoins, setReceivedCoins] = useState('');
+
+    const [coupons, setCoupons] = useState('');
+    const [orders, setOrders] = useState('');
+    const [cart, setCart] = useState('');
 
 
     return (
-        <UserContext.Provider value={{ user, setUser,
-         withdrawls, sentCoins, receivedCoins, 
-         setReceivedCoins, setSentCoins, setWithdrawls  }}>
+        <UserContext.Provider value={{
+            user, setUser,
+            withdrawls, sentCoins, receivedCoins,
+            setReceivedCoins, setSentCoins, setWithdrawls,
+            coupons, setCoupons, orders,
+            setOrders, cart, setCart
+        }}>
             {children}
         </UserContext.Provider>
     )
 }
 
-export const ProductContextProvider = ({ children }) => {
-    const [cart, setCart] = useState([]);
-    const [orders, setOrders] = useState([]);
+export const ShopContextProvider = ({ children }) => {
+    const [orders, setOrders] = useState('');
+    const [shop, setShop] = useState('');
     return (
-        <ProductContext.Provider value={{ cart, setCart, orders, setOrders }}>
+        <ShopContext.Provider value={{ orders, setOrders, shop, setShop }}>
             {children}
-        </ProductContext.Provider>
+        </ShopContext.Provider>
     )
 }
 

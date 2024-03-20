@@ -6,6 +6,7 @@ import axios from 'axios'
 import { ORDER_DETAILS, UPDATE_ORDER } from '@/utils/apiroutes'
 import { ArrowLeftIcon } from '@radix-ui/react-icons'
 import { toast } from '@/components/ui/use-toast'
+import LoadingLayout from '@/components/common/LoadingLayout'
 
 function Page({params}) {
     const router = useRouter()
@@ -23,29 +24,33 @@ function Page({params}) {
 
 
     useEffect(()=>{
+
             axios.post(ORDER_DETAILS, {orderId:params.id}, {withCredentials:true}).then(res=>{
                 setOrder(res.data.product);
                 setLoading(false)
+            }).catch(err=>{
+                console.log(err)
             })
+
     },[params.id])
 
     function changeStat(status){
         axios.post(UPDATE_ORDER, {updator:'seller', orderId:params.id, status}).then(res=>{
+            console.log(res)
             toast({
                 title:res.data.msg
             })
         }).catch(err=>{
+            console.log(err)
             toast({
-                title:err.response.data.msg
+                title:err.response.data.msg || err.message
             })
         })
     }
 
     if(loading){
         return(
-            <>
-              Loading...
-            </>
+            <LoadingLayout/>
         )
     }
 

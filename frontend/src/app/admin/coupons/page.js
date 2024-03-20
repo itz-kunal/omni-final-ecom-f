@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button"
 import axios from 'axios';
-import { ALL_WITHDRAWL, UPDATE_WITHDRAW, SENT_60_COUPON, ALL_COUPONS } from '@/utils/apiroutes';
+import { ALL_WITHDRAWL, UPDATE_WITHDRAW, Coupons, SENT_60_COUPON, ALL_COUPONS } from '@/utils/apiroutes';
 import { useToast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,7 @@ function Coupons() {
     const { toast } = useToast();
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [coupons, setCoupons] = useState([]);
+    const [coupons, setCoupons] = useState(data);
 
     const [couponsToDisplay, setCouponsToDisplay] = useState([]);
     const [pages, setPages] = useState(1);
@@ -120,7 +120,7 @@ function Coupons() {
             <div className="flex items-center  mt-2">
                 {/* -------------------- display number -------------- */}
                 <div className="text-medium text-slate-500 mr-10">
-                    {`${couponsToDisplay.length} out of ${coupons.length} displayed`}
+                    {`${couponsToDisplay.length} out of ${Coupons.length} displayed`}
                 </div>
                 {/* ---------------------- select col numbers ----------------- */}
                 <Select onValueChange={(value) => setPageSize(value)}>

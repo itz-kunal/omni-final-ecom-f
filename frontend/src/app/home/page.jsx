@@ -30,9 +30,17 @@ const Home = () => {
       function fetchData() {
          axios.get(`${GET_PRODUCTS}?size=10`, { withCredentials: true }).then(res => {
             setProducts(res.data)
+         }).catch(err=>{
+            console.log(err)
          })
          axios.post(SEARCH_BY_CATEGORY, { productType: 'general', category: 'electronics', size: 4 }, { withCredentials: true }).then(res => setElectronics(res.data))
+         .catch(err=>{
+            console.log(err)
+         })
          axios.post(SEARCH_BY_CATEGORY, { productType: 'general', category: 'fmcg', size: 4 }, { withCredentials: true }).then(res => setFmcg(res.data))
+         .catch(err=>{
+            console.log(err)
+         })
       }
       fetchData()
    }, [])

@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'next/navigation'
 import { Input } from "@/components/ui/input"
@@ -21,15 +22,16 @@ import { NavigationMenuTrigger } from '@radix-ui/react-navigation-menu'
 
 
 
-const Header = ({title, logo}) => {
+const Header = ({ title, logo }) => {
   const router = useRouter();
   const [userName, setUserName] = useState('')
+
   useEffect(() => {
     const user = localStorage.getItem('user')
     if (!user) return
     const pUser = JSON.parse(user)
     setUserName(pUser.name)
-  })
+  },[])
 
 
   return (
@@ -40,10 +42,10 @@ const Header = ({title, logo}) => {
           {title || ''}
         </div>
 
-        <div className='hidden md:flex justify-center items-center gap-4 w-[40%] border border-input pr-4 rounded-md'>
-          <Input placeholder='Search For Products, Shops and More' />
-          <div className='bg-blue-500 w-full'>
-          <SearchIcon className='bg-blue-500 size-2' />
+        <div className='hidden md:flex justify-center items-center w-[40%] border border-input rounded-md'>
+          <Input placeholder='Search For Products, Shops and More' className='rounded-r-none' />
+          <div className='bg-blue-500 hover:bg-blue-400 cursor-pointer h-9 rounded-r-md flex justify-center items-center w-16 text-white'>
+            <SearchIcon />
           </div>
         </div>
 
@@ -64,24 +66,20 @@ const Header = ({title, logo}) => {
         <div className='hidden md:flex'>
           <NavigationMenu>
             <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>
-
-                  {userName ? <div className='flex gap-2' onClick={() => router.push('/account')}><UserCircle />{userName}</div> :
+              {userName ? <div className='flex gap-2' onClick={() => router.push('/user/account')}><UserCircle />{userName}</div> : (
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>
                     <div className='flex gap-2' onClick={() => router.push('/auth/login')}><UserCircle />login</div>
-                  }
+                  </NavigationMenuTrigger>
 
-                </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <NavigationMenuLink className='px-2 py-1 w-[250px] flex justify-between items-center gap-2'>New Customer? <Button onClick={() => router.push('/auth/signup')}> Signup</Button></NavigationMenuLink>
+                    <NavigationMenuLink className='px-2 py-1 w-[250px] flex justify-between items-center gap-2'>Have Account? <Button onClick={() => router.push('/auth/login')}> Login</Button></NavigationMenuLink>
 
-                <NavigationMenuContent>
-                  <NavigationMenuLink className='px-2 py-1 w-[200px] flex justify-between items-center gap-2'>New Customer? <Button> Signup</Button></NavigationMenuLink>
-                  <NavigationMenuLink>Link</NavigationMenuLink><br />
-                  <NavigationMenuLink>Link</NavigationMenuLink><br />
-                  <NavigationMenuLink>Link</NavigationMenuLink><br />
-                  <NavigationMenuLink>Link</NavigationMenuLink>
-                  <NavigationMenuLink>Link</NavigationMenuLink>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+                    <NavigationMenuLink className='px-2 py-1 w-[250px] flex justify-between items-center gap-2 underline' onClick={() => router.push('/auth/register-shop')}>Create Shop</NavigationMenuLink>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              )}
 
               <div className='hidden md:flex items-center gap-2 mx-2 hover:bg-accent rounded-md bg-background px-4 py-2'>
                 <ShoppingCart />
@@ -100,12 +98,10 @@ const Header = ({title, logo}) => {
         </div>
 
 
-
-
         <div className='md:hidden flex gap-2'>
           <div className='flex items-center gap-3'>
-            {userName ? <button onClick={() => router.push('/auth/login')} className='px-2 py-1 rounded hover:bg-accent flex gap-2'><UserCircle />{userName}</button> :
-              <button onClick={() => router.push('/account')} className='px-2 py-1 rounded hover:bg-accent flex gap-2'><UserCircle /> Login</button>}
+            {userName ? <button onClick={() => router.push('/user/account')} className='px-2 py-1 rounded hover:bg-accent flex gap-2'><UserCircle />{userName}</button> :
+              <button onClick={() => router.push('/auth/login')} className='px-2 py-1 rounded hover:bg-accent flex gap-2'><UserCircle /> Login</button>}
 
             <ShoppingCart />
           </div>

@@ -1,5 +1,5 @@
 
-const API_URI = process.env.API_URI || 'https://omni-final-ecom-backend.onrender.com' ; 
+const API_URI = process.env.API_URI || 'http://localhost:80' ; 
 
 const USER_ENDPOINTS = `${API_URI}/user`;
 const COUPON_ENDPOINTS = `${API_URI}/coupon`;
@@ -14,7 +14,8 @@ export const CHECK_USER = `${USER_ENDPOINTS}/check-user`
 export const LOGIN =  `${USER_ENDPOINTS}/login`;
 export const SIGN_UP = `${USER_ENDPOINTS}/register`;
 
-export const GET_USER = `${USER_ENDPOINTS}/user-info`
+export const GET_USER = `${USER_ENDPOINTS}/user-info`;
+export const GET_USER_TRANSACTIONS = `${USER_ENDPOINTS}/transactions`;
 export const UPDATE_PROFILE = `${USER_ENDPOINTS}/update-profile`;
 export const UPDATE_PASSWORD = `${USER_ENDPOINTS}/update-password`;
 export const LOGOUT = `${USER_ENDPOINTS}/log-out`
@@ -86,9 +87,3 @@ export const FASHION_PRODUCTS = `${ADMIN_ENDPOINTS}/fashion-products`
 export const GET_ALL_USERS = `${ADMIN_ENDPOINTS}/all-users`
 export const SEARCH_USERS = `${ADMIN_ENDPOINTS}/search-users`
 export const DELETE_USER = `${ADMIN_ENDPOINTS}/delete-user`;
-
-export const GET_ALL_SALES = 'soon';
-export const EDIT_NOTIFICATION = 'soon';
-export const DELETE_NOTIFICATION = 'soon';
-export const ADD_NOTIFICATION = 'soon';
-export const VERIFY_OTP = 'soon';

@@ -10,7 +10,7 @@ const ProductCard = ({imgTitle,imgSrc}) => {
 
         <h2 className='text-[16px] w-full text-center overflow-ellipsis mt-2 opacity-90 px-2 py-1'>
             <p className={`line-clamp-2 leading-5 pb-[2.5px]`}>
-             {imgTitle || 'not set yet llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll kl'}
+             {imgTitle || 'not set yet'}
             </p>
           </h2>
        

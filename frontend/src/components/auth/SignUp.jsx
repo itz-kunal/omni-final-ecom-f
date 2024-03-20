@@ -27,7 +27,7 @@ const SignUp = ({refCode}) => {
     const router = useRouter()
 
     const [referralCode, setReferralCode] = useState(refCode || '');
-    const [position, setPosition] = useState('left');
+
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -36,9 +36,7 @@ const SignUp = ({refCode}) => {
     const [isFormValid, setIsFormValid] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(true);
 
-   useEffect(()=>{
-    ifLoggedIn(router)
-   },[router])
+
     const validateForm = () => {
         let errors = {};
 
@@ -73,7 +71,6 @@ const SignUp = ({refCode}) => {
             axios.post(SIGN_UP, {
                 name,
                 referredBy:referralCode,
-                position:referralCode !== '' ? position : '',
                 phone,
                 email,
                 password
@@ -81,19 +78,14 @@ const SignUp = ({refCode}) => {
                 withCredentials: true
             })
                 .then(res => {
-
-                    if(res.data.status == true){
                         toast({
                             description: res.data.msg,
                         })
-                        localStorage.setItem('user', JSON.stringify(res.data.user))
+                        // localStorage.setItem('user', JSON.stringify(res.data.user))
                         window.location.href = `/`;
-                    }
                 }).catch(err => {
-                    console.log('error in signup', err);
                     toast({
-                        title: "Uh oh! Something went wrong.",
-                        description: err.response.data,
+                        title: err.response.data || err.message,
                         variant: "destructive"
                     })
                 })
@@ -119,21 +111,7 @@ const SignUp = ({refCode}) => {
                         />
                         {/* {errors.name && <p className='text-red-700 text-sm'>{errors.name}</p>} */}
                     </div>
-                    {referralCode != '' && (
-                        <div className="mb-4">
-                            <Label>Position</Label>
-                        <RadioGroup defaultValue="option-one" className='flex'>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="left" onChange={(e) => setPosition(e.target.value)} id="option-one" />
-                                <Label htmlFor="option-one">Left</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem onClick={() => setPosition('right')} id="option-two" />
-                                <Label htmlFor="option-two">Right</Label>
-                            </div>
-                        </RadioGroup>
-                        </div>
-                    )}
+              
                     <div className="mb-4">
                         <label htmlFor="name" className="block text-sm font-semibold text-gray-800">Name</label>
                         <input
