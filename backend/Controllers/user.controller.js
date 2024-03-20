@@ -30,7 +30,9 @@ const register = async (req, res) => {
             phone
         })
         if (isUserExist.length > 0) {
-            return res.status(400).send('this phone no. has already registered !')
+            return res.status(400).send({
+                mag: 'this phone no. has already registered !'
+            })
         }
 
         const generatedReferralCode = await generateReferralCode();
@@ -50,8 +52,7 @@ const register = async (req, res) => {
         const token = generateToken(registerApplication);
         res.cookie('jwt', token, {
             httpOnly: true,
-            sameSite: 'none',
-            secure: true
+            sameSite: "strict",
         })
 
         const userRefBy = registerApplication.referredBy;
@@ -59,10 +60,21 @@ const register = async (req, res) => {
             addRefData(registerApplication, userRefBy);
         }
 
-        return res.send({msg:'registration successfull !', user:{name, role:'user'}, status:true})
+        return res.send({
+            msg: 'registration successfull !',
+            user: {
+                phone,
+                name,
+                email,
+                referralCode
+            },
+            status: true
+        })
     } catch (error) {
         console.error('error at user registration', error);
-        return res.status(500).send('Internal Server Error');
+        return res.status(500).send({
+            msg: 'Internal Server Error'
+        });
     }
 };
 
@@ -75,12 +87,11 @@ const login = async (req, res) => {
 
         if (phone == admin_phone && password == admin_pass) {
             const token = generateToken({
-                role:'admin'
+                role: 'admin'
             })
-            res.cookie('jwt', token,{
-                 httpOnly: true,
-            sameSite: 'none',
-            secure: true
+            res.cookie('jwt', token, {
+                httpOnly: true,
+                sameSite: "strict",
             })
             return res.send('admin login successfull !')
         }
@@ -89,27 +100,37 @@ const login = async (req, res) => {
             phone
         });
         if (!user) {
-            return res.status(401).send({error:"user doesn't exists please register first"})
+            return res.status(401).send({
+                error: "user doesn't exists please register first"
+            })
         }
 
         const isPassRight = await checkPassword(password, user.password)
         if (!isPassRight) {
-            return res.status(400).send({error:'wrong password !'})
+            return res.status(400).send({
+                error: 'wrong password !'
+            })
         }
 
         const token = generateToken(user);
         res.cookie('jwt', token, {
-             httpOnly: true,
-            sameSite: 'none',
-            secure: true
+            httpOnly: true,
+            sameSite: "strict",
         })
-        return res.send({msg:'Login successfull', user:{name:user.name, role:user.role}, status:true})
+        return res.send({
+            msg: 'Login successfull',
+            user: {
+                name: user.name,
+                role: user.role
+            },
+            status: true
+        })
 
     } catch (err) {
 
         console.error('error at login', err);
         return res.status(500).send('something went wrong ! try again.')
-        
+
     }
 };
 
@@ -119,21 +140,38 @@ const getUser = async (req, res) => {
         const {
             userId
         } = req.user;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId, {
+            name: 1,
+            phone: 1,
+            email: 1,
+            address: 1,
+            genAddress: 1,
+            role: 1,
+            userInfo: 1,
+            referralCode:1,
+            omniCoin: 1,
+            earning: 1,
+            balance: 1,
+            balance2: 1,
+            balance50: 1
+        });
+
         if (!user) {
-            return res.status(404).send('user not found ! invalid user');
+            return res.status(404).send({
+                msg: 'user not found ! invalid user'
+            });
         }
-        delete user.password;
-        delete user.transactionPassword;
-        delete user.cart;
-        delete user.coupons;
-        delete user.withdrawls;
-        delete user.referrals;
-        
-        return res.send(user);
+
+
+        return res.send({
+            msg: 'successfull',
+            user
+        });
     } catch (err) {
         console.error('error in getting user at user.controller', err);
-        return res.status(500).send('internal server error ! please try again')
+        return res.status(500).send({
+            msg: 'internal server error ! please try again'
+        })
     }
 }
 
@@ -179,14 +217,17 @@ const updatePassword = async (req, res) => {
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).send('User not found ! try again');
+            return res.status(404).send({
+                msg: 'User not found ! try again'
+            });
         }
 
         // Check if the old password matches the stored password
         const isPassRight = await checkPassword(oldPassword, user.password)
-        console.log(oldPassword, newPassword, isPassRight)
         if (!isPassRight) {
-            return res.status(401).send("old password isn't matching ! try again");
+            return res.status(401).send({
+                msg: "old password isn't matching ! try again"
+            });
         }
 
         // Update the password
@@ -194,13 +235,55 @@ const updatePassword = async (req, res) => {
         user.password = hashedNewPassword;
         await user.save();
 
-        res.send('Password updated successfully');
+        return res.send({
+            mag: 'Password updated successfully'
+        });
     } catch (err) {
         console.error('error in updating password in user controller', err);
-        res.status(500).send('Internal Server Error ! try again');
+        return res.status(500).send({
+            msg: 'Internal Server Error ! try again'
+        });
     }
 };
 
+
+//get transactions for user 
+const getTransactions = async (req, res) => {
+    try {
+        const {
+            userId
+        } = req.user;
+
+        const user = await User.findById(userId, {
+            receivedCoins: 1,
+            sentCoins: 1,
+        })
+
+        if (!user) {
+            return res.status(404).send({
+                msg: 'user not fount try again'
+            })
+        }
+
+        const {
+            receivedCoins,
+            sentCoins
+        } = user
+
+        return res.send({
+            msg: 'successfull',
+            receivedCoins,
+            sentCoins
+        })
+
+    } catch (err) {
+
+        console.error('error in getting received coins in user controller', err);
+        res.status(500).send({
+            msg: 'Internal Server Error ! try again'
+        });
+    }
+}
 
 const logout = (req, res) => {
     res.clearCookie('jwt');
@@ -213,7 +296,8 @@ const userController = {
     getUser,
     logout,
     updatePassword,
-    updatedProfile
+    updatedProfile,
+    getTransactions
 }
 
 module.exports = userController;

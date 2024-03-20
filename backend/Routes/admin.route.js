@@ -3,7 +3,7 @@ const adminController = require("../Controllers/admin.controller");
 const isAuthenticated = require('../Middlewares/auth');
 
 const router = Router();
-router.get('/all-users', adminController.getAllUsers);
+router.get('/all-user', adminController.getAllUsers);
 router.post('/search-users', adminController.searchUser);
 router.post('/delete-user', adminController.deleteUser);
 

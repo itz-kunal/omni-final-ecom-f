@@ -44,11 +44,11 @@ const updateOrderStatus = async (req, res) => {
         // const shop = await Shop.findById(shopId);
         const order = await PendingOrder.findById(orderId);
         if (!order) {
-            return res.status(201).send('invalid order!')
+            return res.status(201).send({msg:'invalid order!'})
         }
        
         if (!order.shop.equals(shopId) && !order.user.equals(userId)) {
-            return res.status(201).send('invalid attempt the order is not in your list !')
+            return res.status(201).send({msg:'invalid attempt the order is not in your list !'})
         }
 
         order.status = status;
@@ -63,15 +63,15 @@ const updateOrderStatus = async (req, res) => {
             const finalOrder = new Order(order);
             await finalOrder.save()
             await order.deleteOne();
-            return res.send(`order status changed to delivered successfully`)
+            return res.send({msg:`order status changed to delivered successfully`})
 
         }
-        await order.deleteOne();
-        return res.send(`order status changed to ${status} successfully`)
+        await order.save();
+        return res.send({msg:`order status changed to ${status} successfully`})
 
     } catch (err) {
         console.error('error in changing orders status at shop controller', err);
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({msg:'something went wrong try again'})
     }
 }
 
@@ -253,10 +253,10 @@ const getUserOrders = async(req,res)=>{
         ])
 
         const orders = [...pendingOrders, ...completedOrders]
-        return res.send(orders)
+        return res.send({msg:'successfull' ,orders})
     }catch(err){
         console.error('error in get user orders at order controller', err);
-        return res.status(500).send('internal server error please try again')
+        return res.status(500).send({msg:'internal server error please try again'})
     }
 }
 
@@ -266,16 +266,21 @@ const getShopOrders = async(req,res)=>{
         const {orderType} = req.body;
 
         let orders ;
-        if(orderType && orderType == 'pending'){
-            orders = await PendingOrder.find({shop:shopId})
-        }else{
-            orders = await Order.find({shop:shopId})
-        }
+        // if(orderType && orderType == 'pending'){
+        //     orders = await PendingOrder.find({shop:shopId})
+        // }else{
+        //     orders = await Order.find({shop:shopId})
+        // }
 
-        return res.send(orders)
+        const orders1 = await PendingOrder.find({shop:shopId})
+        const orders2 = await Order.find({shop:shopId})
+
+        orders = [...orders1, ...orders2]
+        
+        return res.send({msg:'successfull', orders})
     }catch(err){
         console.error('error in getting shop orders at order controller', err);
-        return res.status(500).send('something gonna wrong try again')
+        return res.status(500).send({msg:'something gonna wrong try again'})
     }
 }
 

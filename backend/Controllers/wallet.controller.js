@@ -10,12 +10,16 @@ const withdrawlRequest = async (req, res) => {
         const {upi, amount, transactionPassword} = req.body;
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(402).send('user not found ! may be server issue try again.')
+            return res.status(402).send({msg:'user not found ! may be server issue try again.'})
         }
 
         const isPassRight = await checkPassword(transactionPassword, user.transactionPassword)
         if(!isPassRight){
-            return res.status(402).send('wrong transaction password !')
+            return res.status(402).send({msg:'wrong transaction password !'})
+        }
+
+        if(user.balance < amount){
+            return res.status(401).send({msg:'insufficient fund '})
         }
 
         user.withdrawls.push({upi, amount});
@@ -195,17 +199,17 @@ const setTransactionPassword = async(req,res)=>{
 
         const user = await User.findById(userId);
         if(!user || !transactionPassword){
-            return res.send('missing parameters')
+            return res.send({msg:'missing parameters'})
         }
 
         const hashedTransactionPassword = await hashPassword(transactionPassword)
         user.transactionPassword = hashedTransactionPassword;
         await user.save()
 
-        return res.send('transaction password set successfully')
+        return res.send({msg:'transaction password set successfully'})
     }catch(err){
         console.error('error in setting transaction password wallet.controller', err);
-        return res.status(500).send('something went wrong try again !')
+        return res.status(500).send({msg:'something went wrong try again !'})
     }
 }
 
@@ -214,13 +218,13 @@ const getWithdrawls = async(req,res)=>{
         const {userId} = req.user;
         const user = await User.findById(userId);
         if(!user){
-           return res.status(404).send('user not found register first !')
+           return res.status(404).send({msg:'user not found register first !'})
         }
 
-        return res.send(user.withdrawls);
+        return res.send({msg:'successfull', withdrawls:user.withdrawls});
     }catch(err){
         console.error('error in getting withdrawls at wallet controller', err);
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({msg:'something went wrong try again'})
     }
 }
 const walletController = {

@@ -17,10 +17,11 @@ const {
 const getProducts = async (req, res) => {
     try {
         const {
+            coordinates,
             size,
         } = req.query;
 
-
+        // const coordinates = [longitude, latitude];
         const [fashionProducts, generalProducts] = await Promise.all([
             FashionProduct.aggregate([{
                 $sample: {
@@ -38,30 +39,65 @@ const getProducts = async (req, res) => {
                     }
                 }
             }]),
+            // GeneralProduct.aggregate([{
+            //     $sample: {
+            //         size: (parseInt(size)) || 10
+            //     }
+            // }, {
+            //     $project: {
+            //         _id: 1,
+            //         name: 1,
+            //         category: 1,
+            //         price: 1,
+            //         image: {
+            //             $arrayElemAt: ["$images", 0]
+            //         }
+            //     }
+            // }]),
+
+            // Provide the coordinates for nearby shops
             GeneralProduct.aggregate([{
-                $sample: {
-                    size: (parseInt(size)) || 10
-                }
-            }, {
-                $project: {
-                    _id: 1,
-                    name: 1,
-                    category: 1,
-                    price: 1,
-                    image: {
-                        $arrayElemAt: ["$images", 0]
+                    $sample: {
+                        size: (parseInt(size)) || 10
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        category: 1,
+                        price: 1,
+                        image: {
+                            $arrayElemAt: ["$images", 0]
+                        }
+                    }
+                },
+                {
+                    $unwind: "$shops"
+                },
+                {
+                    $geoNear: {
+                        near: {
+                            type: "Point",
+                            coordinates: coordinates
+                        },
+                        distanceField: "shops.distance",
+                        spherical: true,
+                        maxDistance: 10000, // Adjust the maxDistance as needed 
+                        limit: 1 // Limit to 1 nearest shops 
                     }
                 }
-            }])
+            ])
+
         ])
 
         const products = [...generalProducts, ...fashionProducts]
 
-        return res.send(products)
+        return res.send({msg:'successfull', products})
 
     } catch (err) {
         console.error('error in getting products in product controller', err)
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({msg:'something went wrong try again'})
     }
 }
 const getPendingProducts = async (req, res) => {
@@ -79,11 +115,61 @@ const searchProducts = async (req, res) => {
     try {
         const {
             size,
+            coordinates,
             searchedKey
         } = req.body;
 
         if (!searchedKey) {
             return res.status(201).send('missing searched parameter')
+        }
+
+        const pipeLine = [
+            {
+                $match: {
+                    name: {
+                        $regex: searchedKey,
+                        $options: 'i'
+                    }
+                }
+            },
+            {
+                $sample: {
+                    size: (size) || 10
+                }
+            }, {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    category: 1,
+                    price: 1,
+                    image: {
+                        $arrayElemAt: ["$images", 0]
+                    }
+                }
+            }
+        ]
+
+        if(coordinates){
+            pipeLine.push(
+                {
+                    $unwind: "$shops"
+                }
+            )
+
+            pipeLine.push(
+                {
+                    $geoNear: {
+                        near: {
+                            type: "Point",
+                            coordinates: coordinates
+                        },
+                        distanceField: "shops.distance",
+                        spherical: true,
+                        maxDistance: 10000, // Adjust the maxDistance as needed 
+                        limit: 1 // Limit to 1 nearest shops 
+                    }
+                }
+            )
         }
 
         const [fashionProducts, generalProducts] = await Promise.all([
@@ -112,30 +198,7 @@ const searchProducts = async (req, res) => {
                     }
                 }
             ]),
-            GeneralProduct.aggregate([{
-                    $match: {
-                        name: {
-                            $regex: searchedKey,
-                            $options: 'i'
-                        }
-                    }
-                },
-                {
-                    $sample: {
-                        size: (size) || 10
-                    }
-                }, {
-                    $project: {
-                        _id: 1,
-                        name: 1,
-                        category: 1,
-                        price: 1,
-                        image: {
-                            $arrayElemAt: ["$images", 0]
-                        }
-                    }
-                }
-            ])
+            GeneralProduct.aggregate(pipeLine)
         ])
 
         const products = [...generalProducts, ...fashionProducts]
@@ -156,7 +219,9 @@ const getByCategory = async (req, res) => {
         } = req.body;
 
         if (!category || !productType) {
-            return res.send('missing category or productType')
+            return res.status(402).send({
+                msg: 'missing category or productType'
+            })
         }
 
         let products;
@@ -177,8 +242,22 @@ const getByCategory = async (req, res) => {
                         category: 1,
                         price: 1,
                         image: {
-                            $arrayElemAt: ["$image", 0]
+                            $arrayElemAt: ["$images", 0]
                         }
+                    }
+                }, {
+                    $unwind: "$shops"
+                },
+                {
+                    $geoNear: {
+                        near: {
+                            type: "Point",
+                            coordinates: coordinates
+                        },
+                        distanceField: "shops.distance",
+                        spherical: true,
+                        maxDistance: 10000, // Adjust the maxDistance as needed 
+                        limit: 1 // Limit to 1 nearest shops 
                     }
                 }
             ]);
@@ -201,18 +280,23 @@ const getByCategory = async (req, res) => {
                         category: 1,
                         price: 1,
                         image: {
-                            $arrayElemAt: ["$image", 0]
+                            $arrayElemAt: ["$images", 0]
                         }
                     }
                 }
             ]);
         }
 
-        return res.send(products)
+        return res.send({
+            msg: 'successfull',
+            products
+        })
 
     } catch (err) {
         console.error('error in searching products in product controller', err)
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({
+            msg: 'internal server error'
+        })
     }
 }
 
@@ -303,7 +387,9 @@ const addProduct = async (req, res) => {
         const user = await User.findById(userId);
         const shop = await Shop.findById(shopId);
         if (!shop && user.role !== 'admin') {
-            return res.status(402).send('You are not allowed to perform these action')
+            return res.status(402).send({
+                msg: 'You are not allowed to perform these action'
+            })
         }
 
         const images = req.files.map(file => ({
@@ -324,11 +410,16 @@ const addProduct = async (req, res) => {
 
         await product.save();
 
-        return res.send('Product added successfully !');
+        return res.send({
+            msg: 'Product added successfully !',
+            product
+        });
 
     } catch (err) {
         console.error('error in adding product at seller controller', err)
-        return res.status(500).send('Something Went Wrong Please Try Again')
+        return res.status(500).send({
+            msg: 'Something Went Wrong Please Try Again'
+        })
     }
 }
 const addExistingProduct = async (req, res) => {
@@ -485,7 +576,7 @@ const getCategories = async (req, res) => {
         const categories = await Category.find({
             type
         });
-        console.log(type,categories)
+        console.log(type, categories)
         res.send(categories)
     } catch (err) {
         console.log('category err product controller', err);

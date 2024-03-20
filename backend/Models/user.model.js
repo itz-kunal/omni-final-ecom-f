@@ -9,7 +9,7 @@ const couponSchema = new mongoose.Schema({
     win: Number,
     type: {
         type: String,
-        default: 'time'
+        default: 'scratch'
     },
     status: {
         type: String,

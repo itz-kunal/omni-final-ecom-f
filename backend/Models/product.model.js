@@ -70,6 +70,13 @@ const generalProductSchema = new mongoose.Schema({
             type:mongoose.Schema.Types.ObjectId,
             ref:'Shop'
         },
+        location: {
+            type:{
+                type:String,
+                default:'Point'
+            },
+            coordinates:[String]
+        },
         price:Number,
         quantity:Number
     }],
@@ -126,6 +133,7 @@ const pendingProductSchema = new mongoose.Schema({
 const PendingProduct = mongoose.model('pendingProduct', pendingProductSchema);
 
 generalProductSchema.index({name:'text'});
+generalProductSchema.index({ "shops.location": "2dsphere" });
 const GeneralProduct = mongoose.model('Product',generalProductSchema); 
 
 fashionProductSchema.index({

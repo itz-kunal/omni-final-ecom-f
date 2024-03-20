@@ -7,12 +7,12 @@ const { verifyToken } = require("../Utils/jwt.utils");
 
 //take searchedkey and size
 router.get('/pending-products',verifyToken, productController.getPendingProducts)
-router.get('/get-products',verifyToken, productController.getProducts)
-router.post('/search-products',verifyToken, productController.searchProducts)
+router.get('/get-products', productController.getProducts)
+router.post('/search-products', productController.searchProducts)
 //take category and product type and size 
-router.post('/search-by-category',verifyToken, productController.getByCategory)
+router.post('/search-by-category', productController.getByCategory)
 //give us a brief detail of product take productType(required) nd shopId
-router.post('/v/:productId',verifyToken, productController.getProduct)
+router.post('/v/:productId', productController.getProduct)
 
 router.post('/add-new-product', verifyToken, upload,handleMulterError, productController.addProduct)
 

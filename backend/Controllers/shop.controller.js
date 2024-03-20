@@ -114,10 +114,10 @@ const getShops = async (req, res) => {
             }
         }]);
 
-        return res.send(shops)
+        return res.send({msg:'successfull', shops})
     } catch (err) {
         console.error('error in getting shops at shop controller', err);
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({msg:'something went wrong try again'})
     }
 }
 
@@ -130,9 +130,11 @@ const getNearByShops = async (req, res) => {
             location
         } = req.body;
 
-        const shops = await Shop.aggregate([{
+        const shops = await Shop.aggregate([
+            {
                 $project: {
                     _id: 1,
+                    uniqueName:1,
                     name: 1,
                     shopImage: 1,
                     address: 1
@@ -146,17 +148,17 @@ const getNearByShops = async (req, res) => {
                     },
                     key: 'location',
                     distanceMultiplier: 6371,
-                    maxDistance: maxDistance || (500 * 1000),
+                    maxDistance: maxDistance || (5000 * 1000),
                     distanceField: 'distance',
                     spherical: true
                 }
             }
         ]).limit(size);
 
-        return res.send(shops)
+        return res.send({msg:'successful', shops})
     } catch (err) {
         console.error('error in getting shops at shop controller', err);
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({msg:'something went wrong try again'})
     }
 }
 //send unique shop
@@ -189,7 +191,9 @@ const getShop = async (req, res) => {
                         name: 1,
                         category: 1,
                         price: 1,
-                        images: 1,
+                        image: {
+                            $arrayElemAt: ["$images", 0]
+                        }
                     }
                 }
             ]),
@@ -210,7 +214,9 @@ const getShop = async (req, res) => {
                         name: 1,
                         category: 1,
                         price: 1,
-                        images: 1,
+                        image: {
+                            $arrayElemAt: ["$images", 0]
+                        }
                     }
                 }
             ])
@@ -338,10 +344,10 @@ const getSellerShop = async (req, res) => {
         if (!shop) {
             return res.status(400).send('shop not found try again')
         }
-        return res.send(shop)
+        return res.send({msg:'successfull',shop})
     } catch (err) {
         console.error('error in getting shop data at shop controller', err);
-        return res.status(500).send('something went wrong try again')
+        return res.status(500).send({msg:'something went wrong try again'})
     }
 }
 

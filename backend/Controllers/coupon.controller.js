@@ -11,7 +11,7 @@ const buyCoupon = async (req, res) => {
         userId
     } = req.user;
     const {
-        amount,type
+        amount
     } = req.body;
 
     try {
@@ -46,37 +46,6 @@ const buyCoupon = async (req, res) => {
             refwin = getRandomNumber(70, 150)
         }
 
-        const referral = await User.findOne({
-            referralCode: user.referredBy
-        })
-        if (referral) {
-            referral.earning += refwin
-            referral.coupons.push({
-                amount,
-                win: refwin,
-                type: 'time',
-            })
-            await referral.save();
-        }
-
-        if(type == '60day'){
-            const coupon = new Coupon({
-                amount,
-                type,
-                user:user._id,
-                count:1
-            })
-
-            user.coupons.push({
-                amount,
-                type,
-                win
-            })
-
-            await Promise.all([coupon.save(), user.save()])
-
-            return res.send({msg:`you bought it successfully this time win is ₹${win}`})
-        }
 
         user.omniCoin -= amount
         user.coupons.push({
@@ -85,11 +54,28 @@ const buyCoupon = async (req, res) => {
             win,
         })
 
-        user.earning+=win
-      
-    
+        user.earning += (win*0.8);
+        user.balance += (win*0.8);
+        user.balance50 += (win*0.2);
+        user.balance2 += amount;
+        const referral = await User.findOne({
+            referralCode: user.referredBy
+        })
+
+        if (referral) {
+            referral.earning += (refwin*0.8);
+            user.balance += (refwin*0.8);
+            referral.balance50 += (refwin*0.2);
+            referral.coupons.push({
+                amount,
+                win: refwin,
+                type: 'time',
+            })
+            await referral.save();
+        }
+
         await user.save();
-        return res.send({msg:`You won ₹${win}`});
+        return res.send({msg:`You won ₹ ${win}`});
 
     } catch (err) {
         console.error('error in buying coupon at coupon controller', err);
@@ -121,6 +107,10 @@ const send60Coupon = async(req,res)=>{
         }
 
         let win = getRandomNumber(50,150);
+
+        coupon.user.earning += (0.8*win);
+        coupon.user.balance += (0.8*win);
+        coupon.user.balance50 += (0.8*win);
 
         coupon.user.coupons.push({
             amount:coupon.amount,

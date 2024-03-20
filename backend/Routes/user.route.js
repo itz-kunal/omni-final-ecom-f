@@ -11,6 +11,7 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 
 router.get('/user-info', verifyToken, userController.getUser);
+router.get('/transactions', verifyToken, userController.getTransactions)
 router.post('/update-profile', verifyToken, userController.updatedProfile);
 router.post('/update-password', verifyToken, userController.updatePassword)
 
