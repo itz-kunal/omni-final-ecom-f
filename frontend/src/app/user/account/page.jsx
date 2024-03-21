@@ -74,11 +74,11 @@ function Page() {
                 <div className=' flex flex-wrap justify-between mt-2'>
                     <Card className='p-2 pl-3 w-[41vw] m-2'>
                         <h2 className=' font-semibold'>Earnings</h2>
-                        <p>₹{user.earnings || 0}</p>
+                        <p>₹{user.earning || 0}</p>
                     </Card>
                     <Card className='p-2 pl-3 w-[41vw] m-2'>
                         <h2 className=' font-semibold'>Referrals</h2>
-                        <p>{20} persons</p>
+                        <p>{user.referrals || 0} persons</p>
                     </Card>
 
                 </div>
