@@ -74,8 +74,6 @@ const SignUp = ({refCode}) => {
                 phone,
                 email,
                 password
-            }, {
-                withCredentials: true
             })
                 .then(res => {
                         toast({
