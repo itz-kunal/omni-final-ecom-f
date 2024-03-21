@@ -8,7 +8,7 @@ import { Link } from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useContext, useEffect, useState } from 'react'
 import { IoCartOutline } from 'react-icons/io5'
-import { checkLogin } from '../../utils/generalFunctions'
+
 import UserContext from '../../context/UseContext'
 import LoadingLayout from '@/components/common/LoadingLayout'
 
