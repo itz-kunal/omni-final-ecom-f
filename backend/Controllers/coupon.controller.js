@@ -47,7 +47,7 @@ const appendCoupon = async (userId, amount) => {
         user.earning += (win * 0.8);
         user.balance += (win * 0.8);
         user.balance50 += (win * 0.2);
-        user.balance2 += amount;
+        user.balance2 += (amount*1.3);
         const referral = await User.findOne({
             referralCode: user.referredBy
         })
@@ -95,6 +95,7 @@ const buyCoupon = async (req, res) => {
 
         user.omniCoin -= amount;
         if (type == '60day') {
+             user.balance2 += (amount*1.3);
 
             const referral = await User.findOne({
                 referralCode: user.referredBy
