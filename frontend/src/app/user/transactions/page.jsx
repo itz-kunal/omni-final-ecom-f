@@ -251,7 +251,7 @@ export function SetTransactionPassword() {
     const handleSubmit = () => {
 
         setLoading(true)
-        axios.post(SET_TRANSACTION_PASSWORD, { password }, { withCredentials: true }).then(res => {
+        axios.post(SET_TRANSACTION_PASSWORD, { transactionPassword:password }, { withCredentials: true }).then(res => {
 
             setLoading(false)
             toast({
