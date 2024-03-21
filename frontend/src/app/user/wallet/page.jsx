@@ -113,7 +113,7 @@ function Page() {
                 </div>
 
                 {/* --------------------send money------------------ */}
-                <div><Button className=' w-[90vw] mx-[4vw]' onClick={() => router.push('/transactions')}>Transactions</Button></div>
+                <div><Button className=' w-[90vw] mx-[4vw]' onClick={() => router.push('/user/transactions')}>Transactions</Button></div>
                 {/* --------------------withdrawl section------------------ */}
                 <div className='p-2 bg-slate-100'>
                     <h2 className='font-bold text-[20px] mb-4'>Withdraw</h2>
