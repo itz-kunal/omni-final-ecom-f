@@ -39,13 +39,16 @@ function Page() {
             </div>
 
             <div className="flex flex-col pt-14 p-2 bg-slate-100 min-h-[100vh]">
+
+                 <CouponCard bgColor={'bg-green-200'} type='60day' pAmount={1000} />
+                
                 {
                     loading ? <Loader size='medium' title={'Loading...'}/> : (
                         coupons.map(coupon=>{
                             const initalTime = (coupon.period*60*1000) - (Date.now()- new Date(coupon.createdAt).getTime());
                             console.log('ilo', Date.now() - new Date(coupon.createdAt).getTime() )
                             return (
-                            <CouponCard key={coupon._id} couponId={coupon._id} pAmount={coupon.amount} initialTime={parseInt(initalTime/1000)} />
+                            <CouponCard type='time' key={coupon._id} couponId={coupon._id} pAmount={coupon.amount} initialTime={parseInt(initalTime/1000)} />
                         )}
                         )
                     )
@@ -60,7 +63,7 @@ function Page() {
     )
 }
 
-const CouponCard = ({ couponId, bgColor, pAmount = 20, initialTime }) => {
+const CouponCard = ({ couponId, bgColor, pAmount = 20, initialTime , type}) => {
     // console.log('initini',initialTime)
     const router = useRouter()
     const { toast } = useToast()
@@ -87,7 +90,7 @@ const CouponCard = ({ couponId, bgColor, pAmount = 20, initialTime }) => {
 
     const buyCoupon = async (couponRefrence) => {
         try {
-            axios.post(BUY_COUPON, {couponRefrence, amount:pAmount, type:'time'},{withCredentials:true}).then(res=>{
+            axios.post(BUY_COUPON, {couponRefrence, amount:pAmount, type },{withCredentials:true}).then(res=>{
                 toast({
                     title:res.data.msg
                 })
@@ -116,11 +119,11 @@ const CouponCard = ({ couponId, bgColor, pAmount = 20, initialTime }) => {
                 <div className='flex justify-between'>
                     <div>
                         <p>Win up to</p>
-                        <b className=' text-xl'>₹ 2500</b>
+                        <b className=' text-xl'>₹ {pAmount == 20 && '5,000}{pAmount == 100 && '25,000}{pAmount == 500 && '40,000}{pAmount == 1000 && '1,00,000}</b>
                     </div>
                     <div>
-                        <p>Time left</p>
-                        <b className=' text-xl float-right'>{formatTime(timeLeft)}</b>
+                        <p>{type == 'time' ? Time Left : 'Get Upto'}</p>
+                        <b className=' text-xl float-right'>{type == 'time' ? formatTime(timeLeft) : '40 Coupons'}</b>
                     </div>
                 </div>
                 <br />
