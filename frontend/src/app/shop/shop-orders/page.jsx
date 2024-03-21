@@ -8,7 +8,6 @@ import { Link } from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useContext, useEffect, useState } from 'react'
 import { IoCartOutline } from 'react-icons/io5'
-import { checkLogin } from '../../utils/generalFunctions'
 import { ShopContext } from '@/app/context/UseContext'
 import Loader from '@/components/common/Loader'
 
