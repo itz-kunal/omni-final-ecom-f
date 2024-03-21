@@ -33,7 +33,7 @@ import { toast } from '@/components/ui/use-toast'
 import axios from 'axios'
 import { EDIT_PRODUCT, SELLER_SHOP_DATA } from '@/utils/apiroutes'
 import { useRouter } from 'next/navigation'
-import { checkLogin } from '@/utils/generalFunctions'
+
 import UserContext from '@/app/context/UseContext'
 
 
