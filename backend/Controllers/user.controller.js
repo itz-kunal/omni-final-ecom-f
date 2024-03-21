@@ -67,7 +67,7 @@ const register = async (req, res) => {
                 phone,
                 name,
                 email,
-                referralCode
+                referralCode:generatedReferralCode
             },
             status: true
         })
