@@ -32,7 +32,7 @@ function Page() {
                     <div className='ml-4 font-semibold text-[1em]'>Coupons</div>
                 </div>
                 <div className='flex'>
-                    <div className='py-[2px] px-4 rounded-2xl border-2 border-slate-500 text-xl font-medium' onClick={()=>router.push('/my-coupons')}>
+                    <div className='py-[2px] px-4 rounded-2xl border-2 border-slate-500 text-xl font-medium' onClick={()=>router.push('/user/my-coupons')}>
                         History
                     </div>
                 </div>
