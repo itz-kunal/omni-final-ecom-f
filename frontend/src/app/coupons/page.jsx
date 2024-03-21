@@ -122,7 +122,7 @@ const CouponCard = ({ couponId, bgColor, pAmount = 20, initialTime , type}) => {
                         <b className=' text-xl'>₹ {pAmount == 20 && '5,000'}{pAmount == 100 && '25,000'}{pAmount == 500 && '40,000'}{pAmount == 1000 && '1,00,000'}</b>
                     </div>
                     <div>
-                        <p>{type == 'time' ? Time Left : 'Get Upto'}</p>
+                        <p>{type == 'time' ? 'Time Left' : 'Get Upto'}</p>
                         <b className=' text-xl float-right'>{type == 'time' ? formatTime(timeLeft) : '40 Coupons'}</b>
                     </div>
                 </div>
