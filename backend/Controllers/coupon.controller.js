@@ -213,15 +213,15 @@ const append60Coupon = async (coupon) => {
         })
         coupon.count += 1;
         await Promise.all([coupon.user.save(), coupon.save()]);
-        return res.send({
-            msg: 'coupon sent to user successfully !'
-        })
+        // return res.send({
+        //     msg: 'coupon sent to user successfully !'
+        // })
 
     } catch (err) {
         console.error('error in sending60Coup coupon at coupon controller', err);
-        return res.send({
-            msg: 'something went wrong ! try again.'
-        })
+        // return res.send({
+        //     msg: 'something went wrong ! try again.'
+        // })
     }
 }
 
