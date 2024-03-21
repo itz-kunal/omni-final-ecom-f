@@ -86,24 +86,24 @@ function Page() {
                 <div className='flex justify-around flex-wrap shadow-md border-b-2 mb-2'>
                     <Card className='m-2 w-[41vw] p-2'>
                         <h2 className=' font-semibold text-[18px]'>Earnings:</h2>
-                        <p>₹ {user.balance || 0}</p>
+                        <p>₹ {parseFloat(user.balance).toFixed(2) || 0}</p>
                     </Card>
                     <Card className='m-2 w-[41vw] p-2'>
                         <h2 className=' font-semibold text-[18px]'>2% Balance:</h2>
-                        <p>₹ {user.balance2 || 0}</p>
+                        <p>₹ {parseFloat(user.balance2).toFixed(2) || 0}</p>
                     </Card>
                     <Card className='m-2 w-[41vw] p-2'>
                         <h2 className=' font-semibold text-[18px]'>50% Balance:</h2>
-                        <p>₹ {user.balance50 || 0}</p>
+                        <p>₹ {parseFloat(user.balance50).toFixed(2) || 0}</p>
                     </Card>
                     <Card className='m-2 w-[41vw] p-2'>
                         <h2 className=' font-semibold text-[18px]'>Withdrawls:</h2>
-                        <p>₹ {totalWithdrawl}</p>
+                        <p>₹ {parseFloat(totalWithdrawl).toFixed(2)}</p>
                     </Card>
                     <Card className='m-2 w-full p-4 flex justify-between items-center mx-4'>
                         <div>
                             <h2 className=' font-semibold text-[18px]'>Balance (omni-coins):</h2>
-                            <p>₹ {user.omniCoin || 0}</p>
+                            <p>₹ {parseFloat(user.omniCoin).toFixed(2) || 0}</p>
                         </div>
 
                         <Button className='bg-green-700 hover:bg-slate-500' onClick={() => router.push('/pay-amount/topup_100')}>Add</Button>
