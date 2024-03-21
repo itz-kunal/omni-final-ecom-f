@@ -97,7 +97,7 @@ function Page() {
                     </div>
 
                     <Button className='bg-red-500 px-12 ml-3'>Reset</Button>
-                    <SendButton phone={phone} amount={amount} transactionPassword={user.transactionPassword} />
+                    <SendButton phone={phone} amount={amount} transactionPassword={user.transactionPassword ? true : false} />
                 </div>
 
                 {/* -----------------transactions--------------- */}
@@ -234,7 +234,7 @@ export function SetTransactionPassword() {
     const [password, setPassword] = useState('');
     const [conformPassword, setConformPassword] = useState('')
     const [isDisable, setIsDisable] = useState(true);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const doesPassMatch = password == conformPassword;
