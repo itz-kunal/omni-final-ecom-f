@@ -161,7 +161,7 @@ const sendMoney = async(req,res) =>{
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            receiver.omniCoin += parseFloat(amount);
+            receiver.omniCoin += (parseFloat(amount)*0.98);
             receiver.receivedCoins = {
                 sender:user._id,
                 senderName:user.name,
