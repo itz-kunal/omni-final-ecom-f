@@ -3,7 +3,7 @@ const Transaction = require('../Models/transactions.model');
 const User = require('../Models/user.model');
 const Withdrawl = require('../Models/withdrawl.model');
 const { hashPassword, checkPassword } = require('../Utils/passwordHass');
-
+const { default: mongoose } = require('mongoose');
 const withdrawlRequest = async (req, res) => {
     try {
         const {userId} = req.user;
