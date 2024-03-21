@@ -74,12 +74,14 @@ const SignUp = ({refCode}) => {
                 phone,
                 email,
                 password
+            }, {
+                withCredentials: true
             })
                 .then(res => {
                         toast({
                             description: res.data.msg,
                         })
-                        // localStorage.setItem('user', JSON.stringify(res.data.user))
+                        localStorage.setItem('user', JSON.stringify(res.data.user))
                         window.location.href = `/`;
                 }).catch(err => {
                     toast({
