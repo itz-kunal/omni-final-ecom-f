@@ -155,7 +155,8 @@ const getUser = async (req, res) => {
             earning: 1,
             balance: 1,
             balance2: 1,
-            balance50: 1
+            balance50: 1,
+            transactionPassword:1
         });
 
         if (!user) {
