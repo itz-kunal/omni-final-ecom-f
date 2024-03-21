@@ -199,7 +199,7 @@ const append60Coupon = async (coupon) => {
             })
         }
 
-        let win = getRandomNumber(5, 30);
+        let win = getRandomNumber(2, 20);
 
         coupon.user.earning += (0.8 * win);
         coupon.user.balance += (0.8 * win);
