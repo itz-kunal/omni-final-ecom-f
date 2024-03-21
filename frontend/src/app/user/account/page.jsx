@@ -63,7 +63,7 @@ function Page() {
             {/* nav cards */}
             <div className='flex flex-wrap justify-between bg-[#fff] p-2 shadow-md shadow-slate-100'>
                 <div className='border-[2px] border-slate-300 py-1 pl-2 max-w-[43vw] w-[210px] rounded-sm m-1 cursor-pointer' onClick={() => router.push('/user/orders')}>orders</div>
-                <div className='border-[2px] border-slate-300 py-1 pl-2 max-w-[43vw] w-[210px] rounded-sm m-1 cursor-pointer' onClick={() => router.push('/user/coupons')}>coupons</div>
+                <div className='border-[2px] border-slate-300 py-1 pl-2 max-w-[43vw] w-[210px] rounded-sm m-1 cursor-pointer' onClick={() => router.push('/coupons')}>coupons</div>
                 <div className='border-[2px] border-slate-300 py-1 pl-2 max-w-[43vw] w-[210px] rounded-sm m-1 cursor-pointer' onClick={() => router.push('/user/wallet')}>wallet</div>
                 <div className='border-[2px] border-slate-300 py-1 pl-2 max-w-[43vw] w-[210px] rounded-sm m-1 cursor-pointer' onClick={() => router.push('/user/cart')}>carts</div>
             </div>
