@@ -44,7 +44,7 @@ app.use(session({
 }));
 app.use(cors({
     // orign:'http://localhost:3000',
-    origin: 'https://omni-final-ecom-latest.vercel.app', 
+    origin: ['https://omni-final-ecom-latest.vercel.app','https://omni-final-ecom-latest.vercel.app/auth/signup'], 
     // orign:'*',
     credentials: true // Allow cookies to be sent from the frontend
 }))
