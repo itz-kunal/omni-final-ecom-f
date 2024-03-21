@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button"
 import axios from 'axios';
-import { APPROVE_PRODUCT, APPROVE_TRANSACTIONS, GET_TRANSACTIONS, PENDING_PRODUCTS } from '@/utils/apiroutes';
+import { ALL_WITHDRAWL, UPDATE_WITHDRAW, SENT_60_COUPON, ALL_COUPONS } from '@/utils/apiroutes';
 import { useToast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from '@/components/ui/input';
@@ -23,55 +23,52 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import LoadingLayout from '@/components/common/LoadingLayout';
+import { formattedDateTime } from '@/utils/time';
 
 
 
 
-function Transactions() {
+function Coupons() {
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [transactions, setTransactions] = useState([]);
+    const [coupons, setCoupons] = useState([]);
 
-    const [transactionsToDisplay, setTransactionsToDisplay] = useState([]);
+    const [couponsToDisplay, setCouponsToDisplay] = useState([]);
     const [pages, setPages] = useState(1);
 
-    //function forgetting all transactions
+    //function forgetting all Coupons
     useEffect(() => {
-        const getTransactions = async () => {
+        const getCoupons = async () => {
             try {
-                const res = await axios.get(PENDING_PRODUCTS, { withCredentials: true });
-                setTransactions(res.data);
-                console.log(res, 'reso')
-                // setLoading(false)
+                const res = await axios.get(ALL_COUPONS, { withCredentials: true });
+                setCoupons(res.data.coupons);
             } catch (err) {
                 console.log('error in getting users', err)
                 toast({
                     title: "Error:",
-                    description: `error in getting all users, ${err.data}`,
+                    description: `error in getting all users, ${err.data.msg || err.message}`,
                     variant: "destructive"
                 });
             }
         };
 
-        getTransactions();
+        getCoupons();
     }, []);
 
     // useEffect for updating usersToDisplay
     useEffect(() => {
         const startIndex = (pageNo - 1) * pageSize;
         const endIndex = startIndex + pageSize;
-        console.log(transactions)
-        if (transactions) {
-            setLoading(false)
-            setTransactionsToDisplay(transactions.slice(startIndex, endIndex));
+
+        if (coupons) {
+            setCouponsToDisplay(coupons.slice(startIndex, endIndex));
         }
 
         //for updating pages
-        setPages(Math.ceil(transactions.length / pageSize))
-    }, [transactions, pageNo, pageSize]);
+        setPages(Math.ceil(coupons.length / pageSize))
+    }, [coupons, pageNo, pageSize]);
 
     //handle next and back page
     const handleNextBackPage = (i) => {
@@ -94,29 +91,34 @@ function Transactions() {
         }
     }
 
-
-
     const searchUser = (name, id) => {
-        let matchingTransactions = [];
+        let matchingCoupons = [];
         if (name !== '') {
-            matchingTransactions = transactions.filter(user => user.name.includes(name))
+            matchingCoupons = coupons.filter(user => user.name.includes(name))
         } else if (id !== '') {
-            matchingTransactions = transactions.filter(user => user._id.includes(id))
+            matchingCoupons = coupons.filter(user => user._id.includes(id))
         }
 
         if (name === '' && id === '' || !name && !id) {
             const startIndex = (pageNo - 1) * pageSize;
             const endIndex = startIndex + pageSize;
-            setTransactionsToDisplay(transactions.slice(startIndex, endIndex));
+            setCouponsToDisplay(coupons.slice(startIndex, endIndex));
         } else {
-            setTransactionsToDisplay(matchingTransactions)
+            setCouponsToDisplay(matchingCoupons)
         }
     }
 
-    if (loading) {
-        return (
-            <LoadingLayout />
-        )
+    function sendCoupon() {
+        axios.post(SENT_60_COUPON, {}, { withCredentials: true }).then(res => {
+            toast({
+                title: res.data.msg
+            })
+        }).catch(err => {
+            console.log(err)
+            toast({
+                title: err.response.data.msg || err.message
+            })
+        })
     }
 
     return (
@@ -125,15 +127,17 @@ function Transactions() {
             <div className="flex my-4 mt-6">
                 <Input type="text" placeholder="Enter Name..." className="w-96" onChange={(e) => searchUser(e.target.value)} />
                 <Input type="text" placeholder="Enter Id..." className="mx-5 w-80" onChange={(e) => searchUser('', e.target.value)} />
+
+                <Button className='ml-60' onClick={sendCoupon}>Send Coupon</Button>
             </div>
 
-            <DataTable transactions={transactionsToDisplay} />
+            <DataTable coupons={couponsToDisplay} />
 
             {/* ====================== pagination contents ========================== */}
             <div className="flex items-center  mt-2">
                 {/* -------------------- display number -------------- */}
                 <div className="text-medium text-slate-500 mr-10">
-                    {`${transactionsToDisplay.length} out of ${transactions.length} displayed`}
+                    {`${couponsToDisplay.length} out of ${coupons.length} displayed`}
                 </div>
                 {/* ---------------------- select col numbers ----------------- */}
                 <Select onValueChange={(value) => setPageSize(value)}>
@@ -207,22 +211,18 @@ function Transactions() {
     )
 }
 
-function DataTable({ transactions = [] }) {
+function DataTable({ coupons = [] }) {
     const { toast } = useToast()
-
-    const approveTransaction = async (id, status) => {
-        try {
-            const res = await axios.post(APPROVE_PRODUCT, { productId: id, status }, { withCredentials: true });
-            console.log(res)
+    function sendCoupon(schCouponId) {
+        axios.post(SENT_60_COUPON, { schCouponId }, { withCredentials: true }).then(res => {
             toast({
-                title: `product status ${status}ed successfully !`
+                title: res.data.msg
             })
-        } catch (err) {
-            console.error('something went wrong in approving', err);
+        }).catch(err => {
             toast({
-                title: 'umm something went wrong !'
+                title: err.response?.data.msg
             })
-        }
+        })
     }
 
     return (
@@ -233,10 +233,10 @@ function DataTable({ transactions = [] }) {
                     <TableRow className="bg-slate-50">
                         <TableHead className="w-[210px]">ID</TableHead>
                         <TableHead>Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Shop Id</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Added At</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>count</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Created At</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -244,18 +244,18 @@ function DataTable({ transactions = [] }) {
                 {/* ================= Table body data ============== */}
                 <TableBody>
 
-                    {transactions.map((transaction, i) => {
+                    {coupons.map((coupon, i) => {
                         return (
                             <TableRow key={i}>
-                                <TableCell className="font-medium">{transaction._id.toString()}</TableCell>
-                                <TableCell>{transaction.name}</TableCell>
-                                <TableCell>{transaction.category}</TableCell>
-                                <TableCell>{transaction.addedBy}</TableCell>
-                                <TableCell >{transaction.price}</TableCell>
-                                <TableCell>{transaction.addedAt}</TableCell>
+                                <TableCell className="font-medium">{coupon._id.toString()}</TableCell>
+                                <TableCell>{coupon.name}</TableCell>
+                                <TableCell>{coupon.type}</TableCell>
+                                <TableCell>{coupon.type == '60day' ? coupon.count : ''}</TableCell>
+                                <TableCell >{coupon.amount}</TableCell>
+                                <TableCell>{formattedDateTime(coupon.createdAt).date}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button onClick={() => approveTransaction(transaction._id, 'approve')} className='bg-slate-600 mr-1'>Approve</Button>
-                                    <Button onClick={() => approveTransaction(transaction._id, 'decline')} variant='destructive'>Decline</Button>
+                                    <Button onClick={() => sendCoupon(coupon._id)} className='bg-slate-600 mr-1'>Sent ({coupon.count})</Button>
+                                    {/* <Button onClick={() => approveTransaction(withdrawl.user , withdrawl._id, 'decline')} variant='destructive'>Decline</Button> */}
                                 </TableCell>
                             </TableRow>
                         )
@@ -267,4 +267,4 @@ function DataTable({ transactions = [] }) {
 }
 
 
-export default Transactions
+export default Coupons

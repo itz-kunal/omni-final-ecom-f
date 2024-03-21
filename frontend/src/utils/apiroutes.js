@@ -47,7 +47,7 @@ export const SET_TRANSACTION_PASSWORD = `${WALLET_ENDPOINTS}/set-transaction-pas
 export const BUY_COUPON = `${COUPON_ENDPOINTS}/buy-coupon`;
 export const OPEN_SCRATCH = `${COUPON_ENDPOINTS}/open-scratch`;
 export const GET_COUPONS = `${COUPON_ENDPOINTS}/get-coupons`;
-
+export const ACTIVE_COUPONS = `${COUPON_ENDPOINTS}/active-coupons`
 export const ALL_COUPONS = `${COUPON_ENDPOINTS}/all-coupons`
 export const SENT_60_COUPON = `${COUPON_ENDPOINTS}/send-60-coupon`;
 

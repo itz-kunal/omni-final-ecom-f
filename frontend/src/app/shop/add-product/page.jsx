@@ -21,13 +21,17 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from '@/components/ui/use-toast';
 import { ADD_EXISTING_PRODUCT, ADD_NEW_PRODUCT, GET_CATEGORIES, SEARCH_BY_CATEGORY } from '@/utils/apiroutes';
 import axios from 'axios';
-
+// import { checkLogin } from '../../utils/generalFunctions';
 
 
 
 
 function AddProduct() {
     const router = useRouter();
+    // useEffect(() => {
+    //     checkLogin(router)
+    // }, [router])
+
 
     return (
         <>

@@ -9,11 +9,21 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import axios from 'axios';
-import { BUY_COUPON } from '@/utils/apiroutes';
+import { ACTIVE_COUPONS, BUY_COUPON } from '@/utils/apiroutes';
+import Loader from '@/components/common/Loader';
 
 function Page() {
     const router = useRouter()
     const [coupons, setCoupons] = useState([])
+    const [loading, setLoading] = useState(true)
+    useEffect(()=>{
+        axios.get(ACTIVE_COUPONS).then(res=>{
+            setCoupons(res.data.coupons)
+            setLoading(false)
+        }).catch(err=>{
+            console.log(err)
+        })
+    },[])
     return (
         <>
             <div className='flex p-3 shadow-md shadow-gray-100 justify-between fixed w-full bg-sky-500 z-30'>
@@ -29,18 +39,29 @@ function Page() {
             </div>
 
             <div className="flex flex-col pt-14 p-2 bg-slate-100 min-h-[100vh]">
-
-                <CouponCard initialTime={20} />
+                {
+                    loading ? <Loader size='medium' title={'Loading...'}/> : (
+                        coupons.map(coupon=>{
+                            const initalTime = (coupon.period*60*1000) - (Date.now()- new Date(coupon.createdAt).getTime());
+                            console.log('ilo', Date.now() - new Date(coupon.createdAt).getTime() )
+                            return (
+                            <CouponCard key={coupon._id} couponId={coupon._id} pAmount={coupon.amount} initialTime={parseInt(initalTime/1000)} />
+                        )}
+                        )
+                    )
+                }
+                {/* <CouponCard initialTime={20} />
                 <CouponCard bgColor={'bg-blue-200'} pAmount={200} initialTime={20} />
                 <CouponCard bgColor={'bg-green-200'} initialTime={300} />
-                <CouponCard bgColor={'bg-sky-200'} initialTime={40} />
+                <CouponCard bgColor={'bg-sky-200'} initialTime={40} /> */}
 
             </div>
         </>
     )
 }
 
-const CouponCard = ({ bgColor, pAmount = 20, initialTime }) => {
+const CouponCard = ({ couponId, bgColor, pAmount = 20, initialTime }) => {
+    // console.log('initini',initialTime)
     const router = useRouter()
     const { toast } = useToast()
 
@@ -64,15 +85,15 @@ const CouponCard = ({ bgColor, pAmount = 20, initialTime }) => {
     };
 
 
-    const buyCoupon = async (amount) => {
+    const buyCoupon = async (couponRefrence) => {
         try {
-            axios.post(BUY_COUPON, {amount},{withCredentials:true}).then(res=>{
+            axios.post(BUY_COUPON, {couponRefrence},{withCredentials:true}).then(res=>{
                 toast({
-                    title:res.data
+                    title:res.data.msg
                 })
             }).catch(err=>{
                 toast({
-                    title:err.response.data
+                    title:err.response.data.msg ||err.message
                 })
             })
 
@@ -105,7 +126,7 @@ const CouponCard = ({ bgColor, pAmount = 20, initialTime }) => {
                 <br />
                 <div className='flex justify-between px-3'>
                     <Button className='bg-gray-200 text-black border-2 hover:bg-slate-300'>Info</Button>
-                    <Button className='bg-green-600' onClick={()=>buyCoupon(pAmount)}>₹ 25</Button>
+                    <Button className='bg-green-600' onClick={()=>buyCoupon(couponId)}>₹ {pAmount}</Button>
                 </div>
             </div>
         </Card>

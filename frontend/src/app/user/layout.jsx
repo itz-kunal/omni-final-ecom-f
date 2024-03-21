@@ -47,7 +47,9 @@ export default function RootLayout({ children }) {
         }
 
         if(!coupons){
+            console.log('coups')
             axios.get(GET_COUPONS, {withCredentials:true}).then(res=>{
+                console.log(res)
                 setCoupons(res.data.coupons)
             }).catch(err => {
                 console.error(err)

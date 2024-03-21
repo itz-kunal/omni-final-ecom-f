@@ -144,7 +144,7 @@ function Notifications() {
     return (
         <>
             <div className='flex justify-between items-center'>
-                <div className='text-[1.6em] font-medium'>Notifications</div>
+                <div className='text-[1.6em] font-medium'>Recent Notifications</div>
 
                 {/* -------------------notification adding dialogue---------------- */}
                 <Dialog>

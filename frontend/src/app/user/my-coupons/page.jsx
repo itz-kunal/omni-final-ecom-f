@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { formattedDateTime } from "@/utils/time";
-import { checkLogin } from "@/utils/generalFunctions";
 import UserContext from "../../context/UseContext";
 import LoadingLayout from '@/components/common/LoadingLayout';
 
@@ -14,19 +13,15 @@ function Page() {
     const { coupons } = useContext(UserContext);
     const [loading, setLoading] = useState(true)
 
-    useEffect(()=>{
-        checkLogin(router)
-    },[router])
-    
     useEffect(() => {
-        if(coupons){
+        if (coupons) {
             setLoading(false)
         }
     }, [coupons])
 
-    if(loading){
-        return(
-            <LoadingLayout/>
+    if (loading) {
+        return (
+            <LoadingLayout />
         )
     }
 
@@ -46,9 +41,18 @@ function Page() {
             </div>
 
             <div className=" p-2 pt-16 flex flex-col w-[100vw] bg-slate-100 min-h-[100vh]">
-                {coupons.map((coupon) => {
-                    return <CouponCard key={coupon._id} amount={coupon.win} date={formattedDateTime(parseFloat(coupon.createdAt)).date} />
-                })}
+                {
+                    coupons.length > 0 ? (
+                        coupons.slice().reverse().map((coupon) => (
+                            <CouponCard key={coupon._id} amount={coupon.win} date={formattedDateTime(parseFloat(coupon.createdAt))} />
+                        ))) : (
+
+                        <div>
+                            No coupons to display
+                        </div>
+                    )
+
+                }
             </div>
         </>
     )
@@ -66,7 +70,7 @@ const CouponCard = ({ amount, date }) => {
 
                 <div className="ml-2 w-[calc(100vw-7rem)]">
                     <p className="text-[18px]">You earn <span className="text-green-600 font-medium text-lg float-right">+ ₹{amount || 0}</span></p>
-                    <p className="text-gray-500 text-[15px] mt-1">Received on <span className="float-right text-red-500 font-mono">{date || 'NaN Pending'}</span></p>
+                    <p className="text-gray-500 text-[15px] mt-1">Received on <span className="float-right text-red-500 font-mono">{date.date },{date.time || 'NaN Pending'}</span></p>
                 </div>
             </Card>
         </>

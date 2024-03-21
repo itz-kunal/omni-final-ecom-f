@@ -61,37 +61,103 @@ const RegisterShop = () => {
         validateForm();
     }, [name, email, phone, GST]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isFormValid) {
-            axios.post(REGISTER_SHOP, {
-                uniqueName,
-                address,
-                name,
-                phone,
-                email,
-                GST
-            }, {
-                withCredentials: true
-            })
-                .then(res => {
-                        toast({
-                            title: res.data.msg,
-                        })
-                        localStorage.setItem('user', JSON.stringify(res.data.user))
-                        window.location.href = `/`;
-
-                }).catch(err => {
-                    console.log('error in RegisterShop', err);
+      
+        let location = undefined;
+      
+        TakeLocation()
+          .then((coords) => {
+            console.log("location", coords);
+            location = coords; // Set location once it's retrieved
+            if (isFormValid) {
+              if (location !== undefined) {
+                axios
+                  .post(
+                    REGISTER_SHOP,
+                    {
+                      uniqueName,
+                      address,
+                      name,
+                      phone,
+                      email,
+                      GST,
+                      location,
+                    },
+                    {
+                      withCredentials: true,
+                    }
+                  )
+                  .then((res) => {
                     toast({
-                        title: err.response.data || err.message,
-                    })
-                })
-
-        } else {
-            console.log('Form has errors. Please correct them.');
-        }
-    };
+                      title: res.data.msg,
+                    });
+                    console.log(res.data.token);
+                    localStorage.setItem("user", JSON.stringify(res.data.token));
+                    // window.location.href = `/`;
+                  })
+                  .catch((err) => {
+                    console.log("error in RegisterShop", err);
+                    toast({
+                      title: err.response.data.msg || err.message,
+                    });
+                  });
+              } else {
+                alert("Location is mandatory");
+              }
+            } else {
+              console.log("Form has errors. Please correct them.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error retrieving location:", error);
+            const storedLocation = localStorage.getItem("location");
+            if (storedLocation) {
+              location = JSON.parse(storedLocation);
+                      if (isFormValid) {
+              if (location !== undefined) {
+                axios
+                  .post(
+                    REGISTER_SHOP,
+                    {
+                      uniqueName,
+                      address,
+                      name,
+                      phone,
+                      email,
+                      GST,
+                      location,
+                    },
+                    {
+                      withCredentials: true,
+                    }
+                  )
+                  .then((res) => {
+                    toast({
+                      title: res.data.msg,
+                    });
+                    console.log(res.data.token);
+                    localStorage.setItem("user", JSON.stringify(res.data.token));
+                    // window.location.href = `/`;
+                  })
+                  .catch((err) => {
+                    console.log("error in RegisterShop", err);
+                    toast({
+                      title: err.response.data.msg || err.message,
+                    });
+                  });
+              } else {
+                alert("Location is mandatory");
+              }
+            } else {
+              console.log("Form has errors. Please correct them.");
+            }
+            } else {
+              console.log("Location not found in localStorage");
+            }
+          });
+      };
+      
 
     return (
         <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden bg-lavender">

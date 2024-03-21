@@ -29,6 +29,7 @@ const Home = () => {
    useEffect(() => {
       function fetchData() {
          axios.get(`${GET_PRODUCTS}?size=10`, { withCredentials: true }).then(res => {
+            console.log(res, res.data)
             setProducts(res.data)
          }).catch(err=>{
             console.log(err)
