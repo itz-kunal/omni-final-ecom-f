@@ -47,13 +47,13 @@ function Page() {
 
     useEffect(() => {
         if (user) setLoading(false)
-    }, [])
+    }, [user])
 
-    // if (loading) {
-    //     return (
-    //         <LoadingLayout />
-    //     )
-    // }
+    if (loading) {
+        return (
+            <LoadingLayout />
+        )
+    }
     return (
         <>
             <div className='flex p-3 shadow-md shadow-gray-100 justify-between fixed w-full bg-white z-30'>
@@ -200,6 +200,7 @@ function AskTransactionPassword({ phone, amount }) {
                 title: res.data
             })
         }).catch(err => {
+             setLoading(false)
             toast({
                 title: err.response.data
             })
@@ -224,7 +225,7 @@ function AskTransactionPassword({ phone, amount }) {
                 </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-                <Button onClick={handleSubmit} disabled={!password || loading}>{loading ? <Loader size="small" title={'Withdrawing...'} /> : 'Withdraw'}</Button>
+                <Button onClick={handleSubmit} disabled={!password || loading}>{loading ? <Loader size="small" title={'Sending...'} /> : 'Send'}</Button>
             </DialogFooter>
         </DialogContent>
     )
