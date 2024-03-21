@@ -119,7 +119,7 @@ const CouponCard = ({ couponId, bgColor, pAmount = 20, initialTime , type}) => {
                 <div className='flex justify-between'>
                     <div>
                         <p>Win up to</p>
-                        <b className=' text-xl'>₹ {pAmount == 20 && '5,000}{pAmount == 100 && '25,000}{pAmount == 500 && '40,000}{pAmount == 1000 && '1,00,000}</b>
+                        <b className=' text-xl'>₹ {pAmount == 20 && '5,000'}{pAmount == 100 && '25,000'}{pAmount == 500 && '40,000'}{pAmount == 1000 && '1,00,000'}</b>
                     </div>
                     <div>
                         <p>{type == 'time' ? Time Left : 'Get Upto'}</p>
