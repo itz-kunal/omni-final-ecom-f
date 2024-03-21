@@ -11,7 +11,7 @@ const couponSchema = new mongoose.Schema({
         type:String,
         default:'time'
     },
-    couponRefrence:mongoose.Schema.Types.ObjectId,
+    couponRefrence:String,
     status:{
         type:String
     },
