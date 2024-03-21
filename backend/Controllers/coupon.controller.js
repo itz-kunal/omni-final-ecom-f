@@ -325,7 +325,14 @@ const timeCouponClosing = async (couponRefrence, name, amount, period) => {
     }
 }
 
-// createTimingCoupon('hello', 20, 2)
+createTimingCoupon('hello', 20, 5)
+createTimingCoupon('hello', 100, 5)
+createTimingCoupon('hello', 500, 5)
+createTimingCoupon('hello', 1000, 5)
+createTimingCoupon('hello', 20, 40)
+createTimingCoupon('hello', 100, 40)
+createTimingCoupon('hello', 500, 40)
+createTimingCoupon('hello', 1000, 40)
 
 const couponController = {
     allCoupons,
