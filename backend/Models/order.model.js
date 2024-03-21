@@ -28,7 +28,7 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
 
-    phone: Number,
+    userPhone: Number,
     prodImage: String,
     userName: {
         type: String,

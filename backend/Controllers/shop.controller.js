@@ -3,6 +3,7 @@ const User = require("../Models/user.model");
 const {FashionProduct, GeneralProduct} = require("../Models/product.model");
 
 const saveDocs = require("../Middlewares/saveDocs");
+const { generateToken } = require("../Utils/jwt.utils");
 
 const checkUniqueName = async (req, res) => {
     try {
@@ -49,13 +50,13 @@ const registerShop = async (req, res) => {
         }), User.findById(ownerId)])
 
         if (!owner) {
-            return res.status(400).send("it seems you haven't register to the shop yet")
+            return res.status(400).send({msg:"it seems you haven't register to the shop yet"})
         }
         if (isUniqueName) {
-            return res.status(400).send('the shop id has already been taken try with another one')
+            return res.status(400).send({msg:'the shop id has already been taken try with another one'})
         }
         if (isShopExist) {
-            return res.status(400).send('your shop has already been created')
+            return res.status(400).send({msg:'your shop has already been created'})
         }
 
         const shop = new Shop({
@@ -70,12 +71,18 @@ const registerShop = async (req, res) => {
         })
 
         owner.role = 'seller';
+        owner.shop = shop._id;
         await Promise.all([owner.save(), shop.save()]);
 
-        return res.send('shop registered successfully !')
+        const token = generateToken(owner);
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            sameSite: 'none',
+        })
+        return res.send({msg:'shop registered successfully !'})
     } catch (err) {
         console.error('error in regestering shop at shop controller', err);
-        return res.status(500).send('something went wrong please try again')
+        return res.status(500).send({msg:'something went wrong please try again'})
     }
 }
 const editShop = async (req, res) => {

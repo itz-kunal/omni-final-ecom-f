@@ -9,7 +9,9 @@ const couponSchema = new mongoose.Schema({
     type:{
         enum:['time','60day','count'],
         type:String,
+        default:'time'
     },
+    couponRefrence:mongoose.Schema.Types.ObjectId,
     status:{
         type:String
     },
@@ -24,8 +26,30 @@ const couponSchema = new mongoose.Schema({
     sold:{
         type:Number,
         default:0
+    },
+
+    createdAt:{
+        type:Date,
+        default:Date.now()
     }
 })
 
+const currCouponSchema = new mongoose.Schema({
+    name:String,
+    amount:Number,
+    period:Number,
+    status:{
+        type:String,
+        enum:['running', 'clossed'],
+        default:'running'
+    },
+    createdAt:{
+        type:Number,
+        default:Date.now()
+    }
+})
+
+const CurrentCoupon = mongoose.model('currentcoupon', currCouponSchema)
+
 const Coupon = mongoose.model('coupon', couponSchema);
-module.exports = Coupon;
+module.exports = {Coupon,CurrentCoupon};

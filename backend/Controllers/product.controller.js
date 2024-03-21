@@ -17,11 +17,11 @@ const {
 const getProducts = async (req, res) => {
     try {
         const {
-            coordinates,
+            // coordinates,
             size,
         } = req.query;
 
-        // const coordinates = [longitude, latitude];
+        const coordinates = [20, 40];
         const [fashionProducts, generalProducts] = await Promise.all([
             FashionProduct.aggregate([{
                 $sample: {
@@ -56,7 +56,18 @@ const getProducts = async (req, res) => {
             // }]),
 
             // Provide the coordinates for nearby shops
-            GeneralProduct.aggregate([{
+            GeneralProduct.aggregate([
+                {
+                    $geoNear: {
+                        near: {
+                            type: "Point",
+                            coordinates: coordinates
+                        },
+                        distanceField: "shops.distance",
+                        spherical: true,
+                    }
+                }, 
+                {
                     $sample: {
                         size: (parseInt(size)) || 10
                     }
@@ -72,32 +83,29 @@ const getProducts = async (req, res) => {
                         }
                     }
                 },
-                {
-                    $unwind: "$shops"
-                },
-                {
-                    $geoNear: {
-                        near: {
-                            type: "Point",
-                            coordinates: coordinates
-                        },
-                        distanceField: "shops.distance",
-                        spherical: true,
-                        maxDistance: 10000, // Adjust the maxDistance as needed 
-                        limit: 1 // Limit to 1 nearest shops 
-                    }
-                }
+                // {
+                //     $unwind: "$shops"
+                // },
+                // {
+                //     $limit: 1 // Limit to 1 nearest shop
+                // }
             ])
 
+            // GeneralProduct.find({})
         ])
 
         const products = [...generalProducts, ...fashionProducts]
 
-        return res.send({msg:'successfull', products})
+        return res.send({
+            msg: 'successfull',
+            products
+        })
 
     } catch (err) {
         console.error('error in getting products in product controller', err)
-        return res.status(500).send({msg:'something went wrong try again'})
+        return res.status(500).send({
+            msg: 'something went wrong try again'
+        })
     }
 }
 const getPendingProducts = async (req, res) => {
@@ -123,8 +131,7 @@ const searchProducts = async (req, res) => {
             return res.status(201).send('missing searched parameter')
         }
 
-        const pipeLine = [
-            {
+        const pipeLine = [{
                 $match: {
                     name: {
                         $regex: searchedKey,
@@ -149,27 +156,23 @@ const searchProducts = async (req, res) => {
             }
         ]
 
-        if(coordinates){
-            pipeLine.push(
-                {
-                    $unwind: "$shops"
-                }
-            )
+        if (coordinates) {
+            pipeLine.push({
+                $unwind: "$shops"
+            })
 
-            pipeLine.push(
-                {
-                    $geoNear: {
-                        near: {
-                            type: "Point",
-                            coordinates: coordinates
-                        },
-                        distanceField: "shops.distance",
-                        spherical: true,
-                        maxDistance: 10000, // Adjust the maxDistance as needed 
-                        limit: 1 // Limit to 1 nearest shops 
-                    }
+            pipeLine.push({
+                $geoNear: {
+                    near: {
+                        type: "Point",
+                        coordinates: coordinates
+                    },
+                    distanceField: "shops.distance",
+                    spherical: true,
+                    maxDistance: 10000, // Adjust the maxDistance as needed 
+                    limit: 1 // Limit to 1 nearest shops 
                 }
-            )
+            })
         }
 
         const [fashionProducts, generalProducts] = await Promise.all([
@@ -224,11 +227,23 @@ const getByCategory = async (req, res) => {
             })
         }
 
+        let coordinates = [23, 40]
         let products;
         if (productType == 'general') {
-            products = await GeneralProduct.aggregate([{
+            products = await GeneralProduct.aggregate([
+                {
                     $match: {
                         category
+                    }
+                },
+                {
+                    $geoNear: {
+                        near: {
+                            type: "Point",
+                            coordinates: coordinates
+                        },
+                        distanceField: "shops.distance",
+                        spherical: true,
                     }
                 },
                 {
@@ -248,18 +263,6 @@ const getByCategory = async (req, res) => {
                 }, {
                     $unwind: "$shops"
                 },
-                {
-                    $geoNear: {
-                        near: {
-                            type: "Point",
-                            coordinates: coordinates
-                        },
-                        distanceField: "shops.distance",
-                        spherical: true,
-                        maxDistance: 10000, // Adjust the maxDistance as needed 
-                        limit: 1 // Limit to 1 nearest shops 
-                    }
-                }
             ]);
 
         } else if (productType == 'fashion') {
@@ -327,6 +330,7 @@ const getProduct = async (req, res) => {
                 description: 1,
                 images: 1,
                 price: 1,
+                addedBy:1,
                 quantity: {
                     $cond: {
                         if: {
@@ -368,6 +372,7 @@ const getProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
     try {
+        console.log(req.user, req.shop)
         const {
             userId
         } = req.user;
@@ -423,7 +428,6 @@ const addProduct = async (req, res) => {
     }
 }
 const addExistingProduct = async (req, res) => {
-    console.log('hi re')
     try {
         const {
             shopId
@@ -443,7 +447,8 @@ const addExistingProduct = async (req, res) => {
         product.shops.push({
             shop: shopId,
             price,
-            quantity
+            quantity,
+            location: shop.location
         })
 
         await saveDocs(shop, product)
@@ -505,6 +510,7 @@ const approveProduct = async (req, res) => {
             status
         } = req.body;
 
+
         const pendingProduct = await PendingProduct.findById(productId);
 
         if (status == 'decline') {
@@ -512,14 +518,18 @@ const approveProduct = async (req, res) => {
             return res.send('product removed successfully !')
         }
 
+        const shop = await Shop.findById(pendingProduct.addedBy);
+
         let product;
         if (pendingProduct.productType == 'general') {
+            console.log(pendingProduct, pendingProduct._doc)
             product = new GeneralProduct({
-                ...pendingProduct,
+                ...pendingProduct._doc,
                 shops: [{
                     shop: pendingProduct.addedBy,
                     price: pendingProduct.price,
                     quantity: pendingProduct.quantity,
+                    location: shop.location
                 }]
             })
 
@@ -539,17 +549,18 @@ const approveProduct = async (req, res) => {
             console.log(product)
         }
 
-        const shop = await Shop.findById(pendingProduct.addedBy);
+
         shop.products.push({
             product: product._id,
             productType: pendingProduct.productType
         })
 
+
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
 
-            await Promise.all([pendingProduct.deleteOne(), product.save(), shop.save()]);
+            await Promise.all([product.save(), shop.save(), pendingProduct.deleteOne()]);
 
             await session.commitTransaction();
             session.endSession();

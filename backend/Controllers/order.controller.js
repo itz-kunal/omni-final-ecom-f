@@ -75,139 +75,287 @@ const updateOrderStatus = async (req, res) => {
     }
 }
 
-//buy products from nearest store if store id not given
 const buyProduct = async (req, res) => {
     try {
-        const {
-            userId,
-        } = req.user;
-        const user = await User.findById(userId);
-
-        let {
-            productType,
-            productId,
-            shopId,
-            quantity,
-            size,
-            discount50,
-            discount2,
-            balance,
-
-            shippingAddress,
-            location,
-            paymentMode
-        } = req.body;
-
-        let shop;
-        if (!req.body.shopId && productType == 'general') {
-            const nearestShop = await Shop.aggregate([{
-                $match: {
-                    '$products.product': productId,
-                }
-            }, {
-                $geoNear: {
-                    near: {
-                        type: 'Point',
-                        coordinates: [location.longitude, location.latitude],
-                    },
-                    key: 'location',
-                    distanceMultiplier: 6371,
-                    maxDistance: maxDistance || (500 * 1000),
-                    distanceField: 'distance',
-                    spherical: true
-                }
-            }, {
-                $limit: 1
-            }])
-
-            shop = nearestShop;
-        }
-
-        const product = productType == 'general' ? await GeneralProduct.findById(productId) : await FashionProduct.findById(productId);
-
-        if (req.body.shopId) {
-            shop = await Shop.findById(shopId);
-        }
-
-        if (!user || !product || !shop) {
-            return res.status(402).send('something went wrong in fetching try again')
-        }
-        let productAtSeller;
-        if (productType == 'general') {
-            productAtSeller = product.shops.find(shop => shop.shop.equals(shopId))
+      const { userId } = req.user;
+      const user = await User.findById(userId);
+  
+      let {
+        phone,
+        productType,
+        productId,
+        shopId,
+        quantity,
+        size,
+        discount50,
+        discount2,
+        balance,
+        shippingAddress,
+        location,
+        paymentMode,
+      } = req.body;
+  
+      // let shop;
+      // if (!req.body.shopId && productType == 'general') {
+      //     const nearestShop = await Shop.aggregate([{
+      //         $match: {
+      //             '$products.product': productId,
+      //         }
+      //     }, {
+      //         $geoNear: {
+      //             near: {
+      //                 type: 'Point',
+      //                 coordinates: [location.longitude, location.latitude],
+      //             },
+      //             key: 'location',
+      //             distanceMultiplier: 6371,
+      //             maxDistance: maxDistance || (500 * 1000),
+      //             distanceField: 'distance',
+      //             spherical: true
+      //         }
+      //     }, {
+      //         $limit: 1
+      //     }])
+  
+      //     shop = nearestShop;
+      // }
+  
+      const product =
+        productType == "general"
+          ? await GeneralProduct.findById(productId)
+          : await FashionProduct.findById(productId);
+  
+      // if (req.body.shopId) {
+      //     shop = await Shop.findById(shopId);
+      // }
+      console.log("user", user);
+      console.log("product", product);
+      // console.log("shop",shop)
+  
+      if (!user || !product) {
+        return res.status(402).send("something went wrong in fetching try again");
+      }
+  
+      // if (!user || !product || !shop) {
+      //     return res.status(402).send('something went wrong in fetching try again')
+      // }
+      // let productAtSeller;
+      // if (productType == 'general') {
+      //     productAtSeller = product.shops.find(shop => shop.shop.equals(shopId))
+      // } else {
+      //     productAtSeller = product
+      // }
+      // console.log("quantity",quantity)
+      // console.log("productAtSeller",productAtSeller)
+      // console.log("productAtSeller.quantity",productAtSeller.quantity)
+  
+      // if (productAtSeller.quantity < quantity) {
+      //     return res.send(`seller don't have enough product only ${productAtSeller.quantity} qty left`)
+      // }
+  
+      const payableAmount = product.price * quantity;
+      let discount = 0;
+      //for giving 2 % coupon discount
+      if (discount2) {
+        const minus2 = (2 * payableAmount) / 100;
+        if (minus2 < user.balance2) {
+          discount += minus2;
         } else {
-            productAtSeller = product
+          discount += user.balance2;
         }
-
-        if (productAtSeller.quantity < quantity) {
-            return res.send(`seller don't have enough product only ${productAtSeller.quantity} qty left`)
+      }
+      //for giving 50 % coupon discount
+      if (discount50) {
+        const minus50 = (50 * payableAmount) / 100;
+        if (minus50 < user.balance50) {
+          discount += minus50;
+        } else {
+          discount += user.balance50;
         }
-
-        const payableAmount = product.price * quantity;
-        let discount = 0;
-        //for giving 2 % coupon discount
-        if (discount2) {
-            const minus2 = 2 * payableAmount / 100
-            if (minus2 < user.balance2) {
-                discount += minus2
-            } else {
-                discount += user.balance2
-            }
+      }
+      //for buying from topup balance
+      if (balance) {
+        if (payableAmount < user.balance) {
+          discount += payableAmount;
+        } else {
+          discount += user.balance;
         }
-        //for giving 50 % coupon discount
-        if (discount50) {
-            const minus50 = 50 * payableAmount / 100
-            if (minus50 < user.balance50) {
-                discount += minus50
-            } else {
-                discount += user.balance50
-            }
-        }
-        //for buying from topup balance
-        if (balance) {
-            if (payableAmount < user.balance) {
-                discount += payableAmount
-            } else {
-                discount += user.balance
-            }
-        }
-
-        const transaction = new Transaction({
+      }
+  
+      let transaction;
+  
+      paymentMode === "online"
+        ? (transaction = new Transaction({
             user: userId,
-            paidFor: 'product',
+            paidFor: "product",
             upi,
-            amount: payableAmount
-        })
-
-        const order = new PendingOrder({
-            user: userId,
-            shop: shopId,
-            product: productId,
-            phone: user.phone,
-            image: product.images[0],
-            totalPrice: product.price * quantity,
-            payableAmount: payableAmount - discount,
-            paymentStatus: payableAmount == 0 ? 'paid' : 'unpaid',
-            paymentMode,
-            shippingAddress,
-            transaction: paymentMode == 'online' ? transaction._id : '',
-            quantity,
-            size
-        })
-
-        if (paymentMode == 'online') {
-            transaction.paidForDetail = order._id;
-            await transaction.save()
-        }
-
-        await order.save()
-        return res.send('order placed successfully')
-
-    } catch (err) {
-        console.error('error in buying product at product controller', err);
-        return res.status(500).send('something went wrong try again');
+            amount: payableAmount,
+          }))
+        : undefined;
+  
+      const order = new PendingOrder({
+        user: userId,
+        shop: shopId,
+        product: productId,
+        phone: phone || user.phone,
+        image: product.images[0],
+        totalPrice: product.price * quantity,
+        payableAmount: payableAmount - discount,
+        paymentStatus: payableAmount == 0 ? "paid" : "unpaid",
+        paymentMode,
+        shippingAddress,
+        transaction: paymentMode == "online" ? transaction._id : "",
+        quantity,
+        size,
+      });
+  
+      if (paymentMode == "online") {
+        transaction.paidForDetail = order._id;
+        await transaction.save();
+      }
+  
+      const savedOrder = await order.save();
+      console.log(savedOrder._id);
+      return res.json({ msg: "order placed successfully", id: savedOrder._id });
+    } catch (error) {
+      console.error("Error saving order:", error);
+      return res.status(402).json({ msg: "Something went Wrong" });
     }
-}
+  };
+
+//buy products from nearest store if store id not given
+// const buyProduct = async (req, res) => {
+//     try {
+//         const {
+//             userId,
+//         } = req.user;
+//         const user = await User.findById(userId);
+
+//         let {
+//             productType,
+//             productId,
+//             shopId,
+//             quantity,
+//             size,
+//             discount50,
+//             discount2,
+//             balance,
+
+//             shippingAddress,
+//             location,
+//             paymentMode
+//         } = req.body;
+
+//         let shop;
+//         if (!req.body.shopId && productType == 'general') {
+//             const nearestShop = await Shop.aggregate([{
+//                 $match: {
+//                     '$products.product': productId,
+//                 }
+//             }, {
+//                 $geoNear: {
+//                     near: {
+//                         type: 'Point',
+//                         coordinates: [location.longitude, location.latitude],
+//                     },
+//                     key: 'location',
+//                     distanceMultiplier: 6371,
+//                     maxDistance: maxDistance || (500 * 1000),
+//                     distanceField: 'distance',
+//                     spherical: true
+//                 }
+//             }, {
+//                 $limit: 1
+//             }])
+
+//             shop = nearestShop;
+//         }
+
+//         const product = productType == 'general' ? await GeneralProduct.findById(productId) : await FashionProduct.findById(productId);
+
+//         if (req.body.shopId) {
+//             shop = await Shop.findById(shopId);
+//         }
+
+//         if (!user || !product || !shop) {
+//             return res.status(402).send('something went wrong in fetching try again')
+//         }
+//         let productAtSeller;
+//         if (productType == 'general') {
+//             productAtSeller = product.shops.find(shop => shop.shop.equals(shopId))
+//         } else {
+//             productAtSeller = product
+//         }
+
+//         if (productAtSeller.quantity < quantity) {
+//             return res.send(`seller don't have enough product only ${productAtSeller.quantity} qty left`)
+//         }
+
+//         const payableAmount = product.price * quantity;
+//         let discount = 0;
+//         //for giving 2 % coupon discount
+//         if (discount2) {
+//             const minus2 = 2 * payableAmount / 100
+//             if (minus2 < user.balance2) {
+//                 discount += minus2
+//             } else {
+//                 discount += user.balance2
+//             }
+//         }
+//         //for giving 50 % coupon discount
+//         if (discount50) {
+//             const minus50 = 50 * payableAmount / 100
+//             if (minus50 < user.balance50) {
+//                 discount += minus50
+//             } else {
+//                 discount += user.balance50
+//             }
+//         }
+//         //for buying from topup balance
+//         if (balance) {
+//             if (payableAmount < user.balance) {
+//                 discount += payableAmount
+//             } else {
+//                 discount += user.balance
+//             }
+//         }
+
+//         const transaction = new Transaction({
+//             user: userId,
+//             paidFor: 'product',
+//             upi,
+//             amount: payableAmount
+//         })
+
+//         const order = new PendingOrder({
+//             user: userId,
+//             shop: shopId,
+//             product: productId,
+//             phone: user.phone,
+//             image: product.images[0],
+//             totalPrice: product.price * quantity,
+//             payableAmount: payableAmount - discount,
+//             paymentStatus: payableAmount == 0 ? 'paid' : 'unpaid',
+//             paymentMode,
+//             shippingAddress,
+//             transaction: paymentMode == 'online' ? transaction._id : '',
+//             quantity,
+//             size
+//         })
+
+//         if (paymentMode == 'online') {
+//             transaction.paidForDetail = order._id;
+//             await transaction.save()
+//         }
+
+//         await order.save()
+//         return res.send('order placed successfully')
+
+//     } catch (err) {
+//         console.error('error in buying product at product controller', err);
+//         return res.status(500).send('something went wrong try again');
+//     }
+// }
 
 //admin action
 const updOrderPayment = async (orderId, status) => {

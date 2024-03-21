@@ -14,6 +14,7 @@ const fashionProductSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    size:String,
     platformCharge: Number,
     price: {
         type: Number,
@@ -58,6 +59,7 @@ const generalProductSchema = new mongoose.Schema({
     category:{type:String, require:true},
     platformCharge:Number,
     price:{type:Number, require:true},
+    size:String,
    
 
     images:[{
@@ -75,7 +77,7 @@ const generalProductSchema = new mongoose.Schema({
                 type:String,
                 default:'Point'
             },
-            coordinates:[String]
+            coordinates:[Number]
         },
         price:Number,
         quantity:Number
@@ -101,6 +103,7 @@ const pendingProductSchema = new mongoose.Schema({
         enum:['fashion','general'],
         default:'fashion'
     },
+    size:String,
     category: {
         type: String,
         require: true

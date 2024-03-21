@@ -1,4 +1,10 @@
-const Coupon = require('../Models/coupon.model');
+const {
+    promises
+} = require('nodemailer/lib/xoauth2');
+const {
+    Coupon,
+    CurrentCoupon
+} = require('../Models/coupon.model');
 const Transaction = require('../Models/transactions.model');
 const User = require('../Models/user.model');
 
@@ -6,24 +12,10 @@ function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 //Buy copuns
-const buyCoupon = async (req, res) => {
-    const {
-        userId
-    } = req.user;
-    const {
-        amount
-    } = req.body;
-
+const appendCoupon = async (userId, amount) => {
     try {
         const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).send({msg:`user doesn't exist ! please login again.`})
-        }
 
-        if(user.omniCoin < amount){
-            return res.send({msg:'insufficient balance please toup !'})
-        }
-       
         let win;
         if (amount == 20) {
             win = getRandomNumber(0, 5)
@@ -46,26 +38,24 @@ const buyCoupon = async (req, res) => {
             refwin = getRandomNumber(70, 150)
         }
 
-
-        user.omniCoin -= amount
         user.coupons.push({
             type: 'time',
             amount,
             win,
         })
 
-        user.earning += (win*0.8);
-        user.balance += (win*0.8);
-        user.balance50 += (win*0.2);
+        user.earning += (win * 0.8);
+        user.balance += (win * 0.8);
+        user.balance50 += (win * 0.2);
         user.balance2 += amount;
         const referral = await User.findOne({
             referralCode: user.referredBy
         })
 
         if (referral) {
-            referral.earning += (refwin*0.8);
-            user.balance += (refwin*0.8);
-            referral.balance50 += (refwin*0.2);
+            referral.earning += (refwin * 0.8);
+            referral.balance += (refwin * 0.8);
+            referral.balance50 += (refwin * 0.2);
             referral.coupons.push({
                 amount,
                 win: refwin,
@@ -75,54 +65,162 @@ const buyCoupon = async (req, res) => {
         }
 
         await user.save();
-        return res.send({msg:`You won ₹ ${win}`});
-
     } catch (err) {
-        console.error('error in buying coupon at coupon controller', err);
-        return res.send({msg:'something went wrong ! try again.'})
+        console.error('error in appending coupon at coupon controller', err);
     }
 };
 
+const buyCoupon = async (req, res) => {
+    const {
+        userId
+    } = req.user;
+    const {
+        type,
+        amount,
+        couponRefrence
+    } = req.body;
+    try {
+        const user = await User.findById(userId) ;
+        if (!user) {
+            return res.status(404).send({
+                msg: `user doesn't exist ! please login again.`
+            })
+        }
+
+        if (user.omniCoin < amount) {
+            return res.send({
+                msg: 'insufficient balance please toup !'
+            })
+        }
+
+        user.omniCoin -= amount;
+        if (type == '60day') {
+
+            const referral = await User.findOne({
+                referralCode: user.referredBy
+            })
+    
+            const refwin = getRandomNumber(50, 100);
+
+            if (referral) {
+                referral.earning += (refwin * 0.8);
+                referral.balance += (refwin * 0.8);
+                referral.balance50 += (refwin * 0.2);
+                referral.coupons.push({
+                    amount,
+                    win: refwin,
+                    type: 'time',
+                })
+                await referral.save();
+            }
+        }
+
+        const coupon = new Coupon({
+            user: userId,
+            amount,
+            type,
+            couponRefrence:couponRefrence ? couponRefrence : ''
+        })
+
+        await Promise.all([user.save(), coupon.save()])
+
+        return res.send({
+            msg: `Coupon bought successfully`
+        });
+
+    } catch (err) {
+        console.error('error in buying coupon at coupon controller', err);
+        return res.send({
+            msg: 'something went wrong ! try again.'
+        })
+    }
+
+}
+
+
 //send coupons to user
-const getCoupons = async(req,res)=>{
-    try{
-        const {userId} = req.user;
+const getCoupons = async (req, res) => {
+    try {
+        const {
+            userId
+        } = req.user;
 
         const user = await User.findById(userId);
 
-        return res.send(user.coupons)
-    }catch (err) {
+        return res.send({
+            msg: 'successfull',
+            coupons: user.coupons
+        })
+    } catch (err) {
         console.error('error in getting coupon at coupon controller', err);
-        return res.send('something went wrong ! try again.')
+        return res.send({
+            msg: 'something went wrong ! try again.'
+        })
     }
 }
 
 //admin action
-const send60Coupon = async(req,res)=>{
+const allCoupons = async (req,res)=>{
     try{
-        const {schCouponId} = req.body;
-        const coupon = await Coupon.findById(schCouponId).populate('user');
-        if(coupon.type !== '60day' || coupon.count > 60){
-            return res.status(400).send({msg:'invalid attempt either 60 days passes or invalid coupon'})
+        const coupons = await Coupon.find({});
+
+        return res.send({msg:'successfull', coupons})
+    }catch(err){
+        console.error('error in all coup', err)
+        return res.status(500).send({msg:'internal server error try again'})
+    }
+}
+const send60Coupon = async (req, res) => {
+    try {
+        const counpon60s = await Coupon.find({
+            type: '60day'
+        }).populate('user');
+        counpon60s.forEach(coupon => {
+            append60Coupon(coupon)
+        })
+
+        return res.send({
+            msg: 'process started successfully'
+        })
+    } catch (err) {
+        console.error('error in coup controller', err)
+        return res.status(500).send({
+            msg: 'internal server error try again'
+        })
+    }
+}
+const append60Coupon = async (coupon) => {
+    try {
+        // const {schCouponId} = req.body;
+        // const coupon = await Coupon.findById(schCouponId).populate('user');
+        if (coupon.type !== '60day' || coupon.count > 40) {
+            return res.status(400).send({
+                msg: 'invalid attempt either 60 days passes or invalid coupon'
+            })
         }
 
-        let win = getRandomNumber(50,150);
+        let win = getRandomNumber(5, 30);
 
-        coupon.user.earning += (0.8*win);
-        coupon.user.balance += (0.8*win);
-        coupon.user.balance50 += (0.8*win);
+        coupon.user.earning += (0.8 * win);
+        coupon.user.balance += (0.8 * win);
+
+        coupon.user.balance50 += (0.8 * win);
 
         coupon.user.coupons.push({
-            amount:coupon.amount,
-            win,            
+            amount: coupon.amount,
+            win,
         })
         coupon.count += 1;
         await Promise.all([coupon.user.save(), coupon.save()]);
-        return res.send({msg:'coupon sent to user successfully !'})
+        return res.send({
+            msg: 'coupon sent to user successfully !'
+        })
 
-    }catch (err) {
+    } catch (err) {
         console.error('error in sending60Coup coupon at coupon controller', err);
-        return res.send({msg:'something went wrong ! try again.'})
+        return res.send({
+            msg: 'something went wrong ! try again.'
+        })
     }
 }
 
@@ -175,7 +273,63 @@ const sendCoupon = async (req, res) => {
 
 };
 
+const activeCoupons = async (req, res) => {
+    try {
+        const coupons = await CurrentCoupon.find({});
+        res.send({
+            msg: 'successfull',
+            coupons
+        })
+    } catch (err) {
+        console.error('error in act coupon', err)
+        return res.status(500).send({
+            msg: 'internl server error'
+        })
+    }
+}
+//admin action
+const createTimingCoupon = async (name, amount, period) => {
+    try {
+
+        const coupon = CurrentCoupon({
+            name,
+            amount,
+            period,
+            createdAt: Date.now()
+        })
+
+        await coupon.save()
+
+        setTimeout(() => {
+            timeCouponClosing(coupon._id, name, amount, period)
+        }, period * 60 * 1000);
+
+    } catch (err) {
+        console.error('coupon error', err);
+    }
+}
+const timeCouponClosing = async (couponRefrence, name, amount, period) => {
+    console.log('hello')
+    try {
+        createTimingCoupon(name, amount, period)
+        const coupon = await CurrentCoupon.findByIdAndDelete(couponRefrence);
+
+        const coupons = await Coupon.find({
+            couponRefrence
+        });
+        coupons.forEach(coupon => {
+            appendCoupon(coupon.user, coupon.amount)
+        })
+    } catch (err) {
+        console.error('closing error', err)
+    }
+}
+
+// createTimingCoupon('hello', 20, 2)
+
 const couponController = {
+    allCoupons,
+    activeCoupons,
     buyCoupon,
     getCoupons,
     send60Coupon
