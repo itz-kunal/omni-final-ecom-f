@@ -87,7 +87,7 @@ const CouponCard = ({ couponId, bgColor, pAmount = 20, initialTime }) => {
 
     const buyCoupon = async (couponRefrence) => {
         try {
-            axios.post(BUY_COUPON, {couponRefrence},{withCredentials:true}).then(res=>{
+            axios.post(BUY_COUPON, {couponRefrence, amount:pAmount, type:'time'},{withCredentials:true}).then(res=>{
                 toast({
                     title:res.data.msg
                 })
