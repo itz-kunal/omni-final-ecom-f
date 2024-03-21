@@ -85,7 +85,7 @@ const SignUp = ({refCode}) => {
                         window.location.href = `/`;
                 }).catch(err => {
                     toast({
-                        title: err.response.data || err.message,
+                        title: err.response.data.msg || err.message,
                         variant: "destructive"
                     })
                 })
