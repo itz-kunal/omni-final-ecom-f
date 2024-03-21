@@ -29,7 +29,7 @@ const BottomHeader = ({ className }) => {
         <div className='flex flex-col items-center'><TextSearchIcon /><span className='text-sm'>Categories</span></div>
         <div className='flex flex-col items-center'><ShoppingBagIcon /><span className='text-sm'>Shop</span></div>
 
-        {isLogin && <div className='flex flex-col items-center' onClick={()=>router.push('/account')}><UserCircle /><span className='text-sm'>Account</span></div>
+        {isLogin && <div className='flex flex-col items-center' onClick={()=>router.push('/user/account')}><UserCircle /><span className='text-sm'>Account</span></div>
         }
 
         <div className='flex flex-col items-center'><ShoppingCart /><span className='text-sm'>Cart</span></div>
