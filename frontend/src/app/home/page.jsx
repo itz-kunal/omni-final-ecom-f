@@ -43,7 +43,7 @@ const Home = () => {
             console.log(err)
          })
       }
-      fetchData()
+      // fetchData()
    }, [])
 
    useEffect(() => {
