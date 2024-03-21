@@ -18,6 +18,7 @@ const Payment = ({ params }) => {
 
         if(paramsData[0] == 'topup'){
             axios.post(TOP_UP,{upi, amount}, {withCredentials:true}).then(res=>{
+                window.open('/payment-page', '_blank');
                 toast({
                     title:res.data
                 })
