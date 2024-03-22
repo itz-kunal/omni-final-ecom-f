@@ -92,7 +92,7 @@ function Page() {
                             value={amount}
                             onChange={e => setAmount(e.target.value)}
                         />
-                        { amount&&(amount > user.balance ? <p className=' text-sm font-medium text-red-600'>you only have ₹{user.balance} to withdraw</p> :
+                        { amount&&(amount > user.omniCoin ? <p className=' text-sm font-medium text-red-600'>you only have ₹{user.omniCoin} to send</p> :
                          <p className=' text-sm font-medium text-green-600'>₹{amount*0.02} will be deduced as platform charge</p>)}
                     </div>
 
