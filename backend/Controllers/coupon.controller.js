@@ -206,7 +206,7 @@ const append60Coupon = async (coupon) => {
         coupon.user.earning += (0.8 * win);
         coupon.user.balance += (0.8 * win);
 
-        coupon.user.balance50 += (0.8 * win);
+        coupon.user.balance50 += (0.2 * win);
 
         coupon.user.coupons.push({
             amount: coupon.amount,
